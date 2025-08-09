@@ -1,10 +1,18 @@
 <form hx-post="/accounts/{{ account_id }}/transactions" hx-target="#tx-table" hx-swap="outerHTML">
-  <fieldset role="group">
+  <div class="grid">
     <label>Date<input name="date" type="date" required></label>
     <label>Ticker<input name="ticker" required></label>
     <label>Quantity<input name="quantity" type="number" step="any" required></label>
     <label>Price<input name="price" type="number" step="any" required></label>
-    <label>Fees<input name="fees" type="number" step="any"></label>
-  </fieldset>
+    <label>Fees<input name="fees" type="number" step="any" value="0"></label>
+    <label>Type
+      <select name="type">
+        <option value="buy">buy</option>
+        <option value="sell">sell</option>
+        <option value="dividend">dividend</option>
+        <option value="cash">cash</option>
+      </select>
+    </label>
+  </div>
   <button type="submit">Add</button>
 </form>

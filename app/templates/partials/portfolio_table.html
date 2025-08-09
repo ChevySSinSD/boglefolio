@@ -1,5 +1,5 @@
 <table>
-  <thead><tr><th>Date</th><th>Ticker</th><th>Qty</th><th>Price</th><th>Fees</th></tr></thead>
+  <thead><tr><th>Date</th><th>Ticker</th><th>Qty</th><th>Price</th><th>Fees</th><th>Type</th></tr></thead>
   <tbody>
   {% for tx in transactions %}
     <tr>
@@ -8,9 +8,10 @@
       <td>{{ tx.quantity }}</td>
       <td>{{ tx.price }}</td>
       <td>{{ tx.fees }}</td>
+      <td>{{ tx.type }}</td>
     </tr>
   {% else %}
-    <tr><td colspan="5">No transactions</td></tr>
+    <tr><td colspan="6" class="muted">No transactions yet</td></tr>
   {% endfor %}
   </tbody>
 </table>
