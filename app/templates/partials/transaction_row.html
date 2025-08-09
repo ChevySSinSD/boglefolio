@@ -1,0 +1,19 @@
+<tr id="tx-{{ tx.id }}">
+  <td>{{ tx.date }}</td>
+  <td>{{ tx.ticker }}</td>
+  <td>{{ tx.quantity }}</td>
+  <td>{{ tx.price }}</td>
+  <td>{{ tx.fees }}</td>
+  <td>{{ tx.type }}</td>
+  <td>
+    <button class="secondary outline"
+            hx-get="/transactions/{{ tx.id }}/edit"
+            hx-target="#tx-{{ tx.id }}"
+            hx-swap="outerHTML">Edit</button>
+    <button class="contrast outline"
+            hx-post="/transactions/{{ tx.id }}/delete"
+            hx-vals='{"row_id":"tx-{{ tx.id }}"}'
+            hx-target="#toast"
+            hx-swap="innerHTML">Delete</button>
+  </td>
+</tr>

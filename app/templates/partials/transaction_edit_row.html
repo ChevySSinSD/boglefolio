@@ -1,0 +1,25 @@
+<tr id="tx-{{ tx.id }}">
+  <td colspan="7">
+    <form class="grid" hx-post="/transactions/{{ tx.id }}/update" hx-target="#tx-{{ tx.id }}" hx-swap="outerHTML">
+      <label>Date<input type="date" name="date" value="{{ tx.date }}"></label>
+      <label>Ticker<input type="text" name="ticker" value="{{ tx.ticker }}"></label>
+      <label>Qty<input type="number" step="any" name="quantity" value="{{ tx.quantity }}"></label>
+      <label>Price<input type="number" step="any" name="price" value="{{ tx.price }}"></label>
+      <label>Fees<input type="number" step="any" name="fees" value="{{ tx.fees }}"></label>
+      <label>Type
+        <select name="type">
+          {% for opt in ["buy","sell","dividend","cash"] %}
+            <option value="{{ opt }}" {% if tx.type==opt %}selected{% endif %}>{{ opt }}</option>
+          {% endfor %}
+        </select>
+      </label>
+      <div>
+        <button type="submit">Save</button>
+        <button class="secondary" type="button"
+                hx-get="/transactions/{{ tx.id }}/row"
+                hx-target="#tx-{{ tx.id }}"
+                hx-swap="outerHTML">Cancel</button>
+      </div>
+    </form>
+  </td>
+</tr>

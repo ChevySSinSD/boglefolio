@@ -1,127 +1,147 @@
 {% extends "base.html" %}
 {% block content %}
-  <section>
-    <h2>Portfolio Value</h2>
-    <div id="value-chart" style="height:400px"></div>
-    <script>
-      function cssVar(name, fallback) {
-        const v = getComputedStyle(document.documentElement).getPropertyValue(name).trim();
-        return v || fallback;
-      }
-      async function plotPortfolio() {
-        if (!"{{ account_id }}") { return; }
-        const res = await fetch("/api/accounts/{{ account_id }}/snapshots");
-        const data = await res.json();
-        const x = data.map(d => d.date);
-        const y = data.map(d => d.value);
+<section>
+  <h2>Portfolio Value</h2>
+  <div id="value-chart" style="height:400px"></div>
+  <script>
+    function cssVar(name, fallback) {
+      const v = getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+      return v || fallback;
+    }
+    async function plotPortfolio() {
+      if (!"{{ account_id }}") { return; }
+      const res = await fetch("/api/accounts/{{ account_id }}/snapshots");
+      const data = await res.json();
+      const x = data.map(d => d.date);
+      const y = data.map(d => d.value);
 
-        const fontFamily = cssVar('--pico-font-family', 'system-ui, sans-serif');
-        const textColor  = cssVar('--pico-foreground-color', 'currentColor');
-        const mutedColor = cssVar('--pico-muted-color', '#6b7280');
-        const borderColor = cssVar('--pico-border-color', '#d1d5db');
-        const gridColor  = cssVar('--pico-muted-border-color', '#e5e7eb');
-        const primary    = cssVar('--pico-primary', '#0ea5e9');
+      const fontFamily = cssVar('--pico-font-family', 'system-ui, sans-serif');
+      const textColor = cssVar('--pico-foreground-color', 'currentColor');
+      const mutedColor = cssVar('--pico-muted-color', '#6b7280');
+      const borderColor = cssVar('--pico-border-color', '#d1d5db');
+      const gridColor = cssVar('--pico-muted-border-color', '#e5e7eb');
+      const primary = cssVar('--pico-primary', '#0ea5e9');
 
-        const layout = {
-          margin: { t: 16, r: 12, b: 40, l: 48 },
-          paper_bgcolor: 'rgba(0,0,0,0)',
-          plot_bgcolor: 'rgba(0,0,0,0)',
-          font: { family: fontFamily, size: 14, color: textColor },
-          xaxis: {
-             gridcolor: gridColor,
-             linecolor: borderColor,
-             tickfont: { color: mutedColor },
-             zeroline: false
-            },
-          yaxis: {
-            gridcolor: gridColor,
-            linecolor: borderColor,
-            tickfont: { color: mutedColor },
-            zeroline: false
-          },
-          legend: { font: { color: mutedColor } }
-        };
+      const layout = {
+        margin: { t: 16, r: 12, b: 40, l: 48 },
+        paper_bgcolor: 'rgba(0,0,0,0)',
+        plot_bgcolor: 'rgba(0,0,0,0)',
+        font: { family: fontFamily, size: 14, color: textColor },
+        xaxis: {
+          gridcolor: gridColor,
+          linecolor: borderColor,
+          tickfont: { color: mutedColor },
+          zeroline: false
+        },
+        yaxis: {
+          gridcolor: gridColor,
+          linecolor: borderColor,
+          tickfont: { color: mutedColor },
+          zeroline: false
+        },
+        legend: { font: { color: mutedColor } }
+      };
 
-        const trace = {
-          x,
-          y,
-          type: 'scatter',
-          mode: 'lines+markers',
-          line: { width: 2, color: primary },
-          marker: { size: 6 }
-        };
+      const trace = {
+        x,
+        y,
+        type: 'scatter',
+        mode: 'lines+markers',
+        line: { width: 2, color: primary },
+        marker: { size: 6 }
+      };
 
-        Plotly.newPlot('value-chart', [trace], layout, { displayModeBar: false, responsive: true });
+      Plotly.newPlot('value-chart', [trace], layout, { displayModeBar: false, responsive: true });
       window.addEventListener('resize', () => Plotly.Plots.resize('value-chart'));
-      }
+    }
 
+    plotPortfolio();
+
+    // call your existing plotting function again
+    window.addEventListener('bogle-theme-changed', () => {
       plotPortfolio();
+    });
+  </script>
+</section>
 
-      // call your existing plotting function again
-      window.addEventListener('bogle-theme-changed', () => {
-        plotPortfolio();
-      });
-    </script>
-  </section>
+<section>
+  <h2>Holdings ({{ method }})</h2>
+  {% if positions %}
+  <div id="holdings">
+    <table>
+      <thead>
+        <tr>
+          <th>Ticker</th>
+          <th class="muted">Qty</th>
+          <th>Avg Cost</th>
+          <th>Basis</th>
+          <th>Market Value</th>
+          <th>Unrealized</th>
+          <th>Realized</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for p in positions.values() %}
+        <tr>
+          <td><strong>{{ p.ticker }}</strong></td>
+          <td class="muted">{{ '%.4f'|format(p.quantity) }}</td>
+          <td>{{ p.avg_cost|currency }}</td>
+          <td>{{ p.basis|currency }}</td>
+          <td>{{ p.market_value|currency }}</td>
+          <td>{{ p.unrealized_gain|currency }}</td>
+          <td>{{ p.realized_gain|currency }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <p class="muted">No holdings yet. Add a transaction below or import a CSV.</p>
+  {% endif %}
+</section>
 
-  <section>
-    <h2>Holdings ({{ method }})</h2>
-    {% if positions %}
-      <div id="holdings">
-        <table>
-          <thead>
-            <tr>
-              <th>Ticker</th>
-              <th class="muted">Qty</th>
-              <th>Avg Cost</th>
-              <th>Basis</th>
-              <th>Market Value</th>
-              <th>Unrealized</th>
-              <th>Realized</th>
-            </tr>
-          </thead>
-          <tbody>
-            {% for p in positions.values() %}
-              <tr>
-                <td><strong>{{ p.ticker }}</strong></td>
-                <td class="muted">{{ '%.4f'|format(p.quantity) }}</td>
-                <td>{{ p.avg_cost|currency }}</td>
-                <td>{{ p.basis|currency }}</td>
-                <td>{{ p.market_value|currency }}</td>
-                <td>{{ p.unrealized_gain|currency }}</td>
-                <td>{{ p.realized_gain|currency }}</td>
-              </tr>
-            {% endfor %}
-          </tbody>
-        </table>
-      </div>
-    {% else %}
-      <p class="muted">No holdings yet. Add a transaction below or import a CSV.</p>
-    {% endif %}
-  </section>
+<section>
+  <h2>Add Transaction</h2>
+  {% include "partials/transaction_form.html" %}
+</section>
 
-  <section>
-    <h2>Add Transaction</h2>
-    {% include "partials/transaction_form.html" %}
-  </section>
-
-  <section>
+<!-- <section>
     <h2>Transactions</h2>
     <div id="tx-table">
       {% include "partials/portfolio_table.html" %}
     </div>
-  </section>
+  </section> -->
 
-  <section>
-    <h2>Import CSV</h2>
-    {% if account_id %}
-    <form hx-post="/import/csv/{{ account_id }}" hx-target="#tx-table" hx-swap="outerHTML" enctype="multipart/form-data">
-      <input type="file" name="file" accept=".csv" required />
-      <button type="submit">Import</button>
-    </form>
-    <p class="muted">Headers: <code>date,ticker,quantity,price,fees,type,notes</code> (date as YYYY-MM-DD)</p>
-    {% else %}
-      <p class="muted">Create an account by seeding or adding your first transaction.</p>
-    {% endif %}
-  </section>
+<section>
+  <h2>Import CSV</h2>
+  {% if account_id %}
+  <form hx-post="/import/csv/{{ account_id }}" hx-target="#tx-table" hx-swap="outerHTML" enctype="multipart/form-data">
+    <input type="file" name="file" accept=".csv" required />
+    <button type="submit">Import</button>
+  </form>
+  <p class="muted">Headers: <code>date,ticker,quantity,price,fees,type,notes</code> (date as YYYY-MM-DD)</p>
+  {% else %}
+  <p class="muted">Create an account by seeding or adding your first transaction.</p>
+  {% endif %}
+</section>
+
+<section>
+  <form class="grid" hx-get="/accounts/{{ account_id }}/transactions/table" hx-target="#tx-table" hx-push-url="true">
+    <label>Ticker
+      <input type="text" name="ticker" placeholder="VTI">
+    </label>
+    <label>Date from
+      <input type="date" name="date_from">
+    </label>
+    <label>Date to
+      <input type="date" name="date_to">
+    </label>
+    <button type="submit">Filter</button>
+  </form>
+</section>
+<section>
+  <div id="tx-table">
+    {% include "partials/transactions_table.html" %}
+  </div>
+</section>
 {% endblock %}

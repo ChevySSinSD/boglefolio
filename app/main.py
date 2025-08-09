@@ -151,3 +151,70 @@ async def import_csv(request: Request, account_id: str, file: UploadFile = File(
         session.commit()
         txs = get_transactions_for_account(session, account_id)
     return templates.TemplateResponse("partials/portfolio_table.html", {"request": request, "transactions": txs})
+
+
+# ===== HTMX UX endpoints =====
+from fastapi import HTTPException
+
+
+@app.get("/accounts/{account_id}/transactions/table", response_class=HTMLResponse)
+def transactions_table(request: Request, account_id: str, ticker: str | None = None, date_from: str | None = None, date_to: str | None = None):
+    with Session(engine) as session:
+        stmt = select(Transaction).where(Transaction.account_id == account_id)
+        if ticker:
+            t = ticker.upper()
+            # SQLite doesn't support ILIKE; using LIKE with upper()
+            stmt = stmt.where(Transaction.ticker.like(f"%{t}%"))
+        if date_from:
+            d1 = datetime.strptime(date_from, "%Y-%m-%d").date()
+            stmt = stmt.where(Transaction.date >= d1)
+        if date_to:
+            d2 = datetime.strptime(date_to, "%Y-%m-%d").date()
+            stmt = stmt.where(Transaction.date <= d2)
+        rows = session.exec(stmt.order_by(Transaction.date, Transaction.id)).all()
+    return templates.TemplateResponse("partials/transactions_table.html", {"request": request, "transactions": rows})
+
+@app.get("/transactions/{tx_id}/row", response_class=HTMLResponse)
+def transaction_row(request: Request, tx_id: str):
+    with Session(engine) as session:
+        tx = session.get(Transaction, tx_id)
+        if not tx:
+            raise HTTPException(404)
+    return templates.TemplateResponse("partials/transaction_row.html", {"request": request, "tx": tx})
+
+@app.get("/transactions/{tx_id}/edit", response_class=HTMLResponse)
+def edit_transaction_row(request: Request, tx_id: str):
+    with Session(engine) as session:
+        tx = session.get(Transaction, tx_id)
+        if not tx:
+            raise HTTPException(404)
+    return templates.TemplateResponse("partials/transaction_edit_row.html", {"request": request, "tx": tx})
+
+@app.post("/transactions/{tx_id}/update", response_class=HTMLResponse)
+def update_transaction_row(request: Request, tx_id: str, date: str = Form(...), ticker: str = Form(...), quantity: float = Form(...), price: float = Form(...), fees: float = Form(0.0), type: str = Form("buy")):
+    with Session(engine) as session:
+        tx = session.get(Transaction, tx_id)
+        if not tx:
+            raise HTTPException(404)
+        tx.date = datetime.strptime(date, "%Y-%m-%d").date()
+        tx.ticker = ticker.upper()
+        tx.quantity = quantity
+        tx.price = price
+        tx.fees = fees
+        tx.type = type
+        session.add(tx)
+        session.commit()
+        session.refresh(tx)
+    return templates.TemplateResponse("partials/transaction_row.html", {"request": request, "tx": tx})
+
+@app.post("/transactions/{tx_id}/delete", response_class=HTMLResponse)
+def delete_transaction(request: Request, tx_id: str, row_id: str | None = None):
+    with Session(engine) as session:
+        tx = session.get(Transaction, tx_id)
+        if not tx:
+            raise HTTPException(404)
+        session.delete(tx)
+        session.commit()
+    # return OOB toast and client-side row removal
+    ctx = {"request": request, "title": "Deleted", "message": "Transaction removed.", "row_id": row_id or ""}
+    return templates.TemplateResponse("partials/toast.html", ctx)

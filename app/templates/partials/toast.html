@@ -1,0 +1,19 @@
+<div id="toast" hx-swap-oob="true">
+  <article>
+    <header><strong>{{ title }}</strong></header>
+    <p>{{ message }}</p>
+  </article>
+  <script>
+    // Auto-clear toast after 2.5s
+    setTimeout(() => {
+      const t = document.getElementById('toast');
+      if (t) t.innerHTML = '';
+      // Optionally, remove a row if server asks via hx-triggered event
+      const rowId = "{{ row_id|default('') }}";
+      if (rowId) {
+        const el = document.getElementById(rowId);
+        if (el) el.remove();
+      }
+    }, 2500);
+  </script>
+</div>

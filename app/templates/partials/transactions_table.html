@@ -1,0 +1,20 @@
+<table>
+  <thead>
+    <tr>
+      <th>Date</th>
+      <th>Ticker</th>
+      <th>Qty</th>
+      <th>Price</th>
+      <th>Fees</th>
+      <th>Type</th>
+      <th style="width:160px;"></th>
+    </tr>
+  </thead>
+  <tbody id="tx-tbody">
+    {% for tx in transactions %}
+      {% include "partials/transaction_row.html" %}
+    {% else %}
+      <tr><td colspan="7" class="muted">No transactions found.</td></tr>
+    {% endfor %}
+  </tbody>
+</table>
