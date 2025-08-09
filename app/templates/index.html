@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% block content %}
+  <section>
+    <h2>Portfolio Value</h2>
+    <div id="value-chart" style="height:400px"></div>
+    <script>
+    async function fetchAndPlot() {
+      const res = await fetch("/api/accounts/{{ account_id }}/snapshots");
+      const data = await res.json();
+      const x = data.map(d => d.date);
+      const y = data.map(d => d.value);
+      Plotly.newPlot('value-chart', [{ x, y, type: 'scatter', mode: 'lines+markers', name: 'Total Value' }], {margin: {t:20}});
+    }
+    fetchAndPlot();
+    </script>
+  </section>
+
+  <section>
+    <h2>Add Transaction</h2>
+    {% include "partials/transaction_form.html" %}
+  </section>
+
+  <section>
+    <h2>Transactions</h2>
+    <div id="tx-table">
+      {% include "partials/portfolio_table.html" %}
+    </div>
+  </section>
+{% endblock %}
