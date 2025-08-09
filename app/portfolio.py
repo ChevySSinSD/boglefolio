@@ -1,7 +1,10 @@
 from __future__ import annotations
+
 from dataclasses import dataclass, field
-from typing import List, Dict
+from typing import Dict, List
+
 from .models import Transaction
+
 
 @dataclass
 class Lot:

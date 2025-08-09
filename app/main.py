@@ -1,13 +1,16 @@
+import csv
+import io
+import os
 from datetime import datetime
-from fastapi import FastAPI, Request, Form, UploadFile, File
+
+from fastapi import FastAPI, File, Form, Request, UploadFile
 from fastapi.responses import HTMLResponse, StreamingResponse
-from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
-from sqlmodel import SQLModel, create_engine, Session, select
-from .models import Account, Transaction, Snapshot
+from sqlmodel import Session, SQLModel, create_engine, select
+
 from .crud import create_transaction, get_transactions_for_account, latest_prices
+from .models import Account, Snapshot, Transaction
 from .portfolio import compute_positions
-import os, csv, io
 
 ## Create Database Engine
 # https://fastapi.tiangolo.com/tutorial/sql-databases/#create-an-engine

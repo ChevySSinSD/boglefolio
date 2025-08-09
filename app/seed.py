@@ -1,7 +1,9 @@
 import uuid
 from datetime import date
+
 from sqlmodel import Session, SQLModel, create_engine, select
-from .models import User, Account, Transaction, Snapshot, TickerPrice
+
+from .models import Account, Snapshot, TickerPrice, Transaction, User
 
 DATABASE_URL = "sqlite:///./db.sqlite"
 engine = create_engine(DATABASE_URL, connect_args={"check_same_thread": False})

@@ -1,6 +1,9 @@
 from typing import List
+
 from sqlmodel import Session, select
-from .models import Transaction, Snapshot, Account, TickerPrice
+
+from .models import Snapshot, TickerPrice, Transaction
+
 
 def create_transaction(session: Session, tx: Transaction) -> Transaction:
     session.add(tx)
