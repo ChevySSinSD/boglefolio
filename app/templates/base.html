@@ -1,20 +1,135 @@
 <!doctype html>
 <html>
 <head>
-  <meta charset="utf-8" />
   <title>BogleFolio</title>
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@2/css/pico.min.css">
-  <script src="https://cdn.jsdelivr.net/npm/htmx.org@2.0.6/dist/htmx.min.js" integrity="sha384-Akqfrbj/HpNVo8k11SXBb6TlBWmXXlYQrCSqEWmyKJe+hDm3Z/B2WVG4smwBkRVm" crossorigin="anonymous"></script>
-  <script src="https://cdn.plot.ly/plotly-2.24.1.min.js"></script>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="color-scheme" content="light dark"/>
+
+  <!-- Pico.css v2.x -->
+  <link 
+    rel="stylesheet"
+    href="https://cdn.jsdelivr.net/npm/@picocss/pico@2/css/pico.min.css"
+    integrity="sha256-+8mmP8n8n3LRL9f8mAbhH6n3euT5ytFGsnADoRGbo9s="
+    crossorigin="anonymous"
+  />
+
+  <!-- HTMX v2.x -->
+  <script 
+    src="https://cdn.jsdelivr.net/npm/htmx.org@2/dist/htmx.min.js"
+    integrity="sha256-tnaO7U86+Ftzp1BUcBvWDhfKxxiu8rf2slTl4OIEVhY="
+    crossorigin="anonymous">
+  </script>
+
+  <!-- Plotly.js v3.x -->
+  <script 
+    src="https://cdn.jsdelivr.net/npm/plotly.js@3/dist/plotly.min.js"
+    integrity="sha256-Ei4740bWZhaUTQuD6q9yQlgVCMPBz6CZWhevDYPv93A="
+    crossorigin="anonymous">
+  </script>
+
+  <!-- Theme Toggle v4.x (Expand) -->
+  <link 
+    rel="stylesheet"
+    href="https://cdn.jsdelivr.net/npm/theme-toggles@4/css/expand.min.css"
+    integrity="sha256-y8/YChUvFWJZa+7Ibvf4PCJ9fEib6WOUD5RAMnDur4c="
+    crossorigin="anonymous"
+  />
+  <style>
+    /* Make the toggle look like an icon button, not a filled action button */
+    nav .theme-toggle {
+      color: var(--pico-foreground-color);
+    }
+  </style>
 </head>
 <body>
   <main class="container">
     <header>
-      <h1>BogleFolio</h1>
+      <nav>
+        <ul>
+          <li><svg xmlns="http://www.w3.org/2000/svg" height="80" viewBox="0 0 80 80"><path d="M63.96 6.316H41.8798l7.505 7.5048-10.4053 10.4028-6.9556-6.9555L6.548 41.4014l3.4374 3.6328 21.9434-20.786 7.0508 7.0482zM43.1298 51.6064l-9.9023-9.9023L0 73.684h80V15.9864z"/></svg></li>
+          <li><strong>BogleFolio</strong></li>
+        </ul>
+        <ul>
+          <li><a href="/">Home</a></li>
+          <li><a href="/api/accounts/{{ account_id }}/snapshots">Snapshots</a></li>
+          <li>|</li>
+          <li>
+            <button
+              id="themeToggle"
+              class="theme-toggle"
+              type="button"
+              title="Toggle theme"
+              aria-label="Toggle theme"
+              aria-pressed="false"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                aria-hidden="true"
+                width="1em"
+                height="1em"
+                fill="currentColor"
+                class="theme-toggle__expand"
+                viewBox="0 0 32 32"
+              >
+                <clipPath id="theme-toggle__expand__cutout">
+                  <path d="M0-11h25a1 1 0 0017 13v30H0Z" />
+                </clipPath>
+                <g clip-path="url(#theme-toggle__expand__cutout)">
+                  <circle cx="16" cy="16" r="8.4" />
+                  <path d="M18.3 3.2c0 1.3-1 2.3-2.3 2.3s-2.3-1-2.3-2.3S14.7.9 16 .9s2.3 1 2.3 2.3zm-4.6 25.6c0-1.3 1-2.3 2.3-2.3s2.3 1 2.3 2.3-1 2.3-2.3 2.3-2.3-1-2.3-2.3zm15.1-10.5c-1.3 0-2.3-1-2.3-2.3s1-2.3 2.3-2.3 2.3 1 2.3 2.3-1 2.3-2.3 2.3zM3.2 13.7c1.3 0 2.3 1 2.3 2.3s-1 2.3-2.3 2.3S.9 17.3.9 16s1-2.3 2.3-2.3zm5.8-7C9 7.9 7.9 9 6.7 9S4.4 8 4.4 6.7s1-2.3 2.3-2.3S9 5.4 9 6.7zm16.3 21c-1.3 0-2.3-1-2.3-2.3s1-2.3 2.3-2.3 2.3 1 2.3 2.3-1 2.3-2.3 2.3zm2.4-21c0 1.3-1 2.3-2.3 2.3S23 7.9 23 6.7s1-2.3 2.3-2.3 2.4 1 2.4 2.3zM6.7 23C8 23 9 24 9 25.3s-1 2.3-2.3 2.3-2.3-1-2.3-2.3 1-2.3 2.3-2.3z" />
+                </g>
+              </svg>
+            </button>
+          </li>
+        </ul>
+      </nav>
     </header>
+
     <article>
       {% block content %}{% endblock %}
     </article>
   </main>
+
+  <script>
+    // Wire up the visual toggle to Pico's theme
+    const root = document.documentElement;
+    const btn  = document.getElementById('themeToggle');
+    const KEY  = 'boglefolio.theme';
+
+    const prefersDark = () =>
+      window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+
+    function getTheme() {
+      return localStorage.getItem(KEY) || (prefersDark() ? 'dark' : 'light');
+    }
+
+    function applyTheme(theme) {
+      root.setAttribute('data-theme', theme);
+      // The theme-toggles CSS uses this class to animate to the "dark" state
+      const toggled = theme === 'dark';
+      btn.classList.toggle('theme-toggle--toggled', toggled);
+      btn.setAttribute('aria-pressed', toggled ? 'true' : 'false');
+      // Let pages/charts re-style themselves
+      window.dispatchEvent(new CustomEvent('bogle-theme-changed', { detail: { theme } }));
+    }
+
+    // init
+    applyTheme(getTheme());
+
+    // click handler
+    btn.addEventListener('click', () => {
+      const next = getTheme() === 'dark' ? 'light' : 'dark';
+      localStorage.setItem(KEY, next);
+      applyTheme(next);
+    });
+
+    // optional: track OS theme changes when user hasn't chosen explicitly
+    window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (e) => {
+      if (!localStorage.getItem(KEY)) {
+        applyTheme(e.matches ? 'dark' : 'light');
+      }
+    });
+  </script>
 </body>
 </html>

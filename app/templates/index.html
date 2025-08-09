@@ -4,14 +4,62 @@
     <h2>Portfolio Value</h2>
     <div id="value-chart" style="height:400px"></div>
     <script>
-    async function fetchAndPlot() {
-      const res = await fetch("/api/accounts/{{ account_id }}/snapshots");
-      const data = await res.json();
-      const x = data.map(d => d.date);
-      const y = data.map(d => d.value);
-      Plotly.newPlot('value-chart', [{ x, y, type: 'scatter', mode: 'lines+markers', name: 'Total Value' }], {margin: {t:20}});
-    }
-    fetchAndPlot();
+      function cssVar(name, fallback) {
+        const v = getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+        return v || fallback;
+      }
+
+      async function fetchAndPlot() {
+        const res = await fetch("/api/accounts/{{ account_id }}/snapshots");
+        const data = await res.json();
+        const x = data.map(d => d.date);
+        const y = data.map(d => d.value);
+
+        const fontFamily = cssVar('--pico-font-family', 'system-ui, sans-serif');
+        const textColor  = cssVar('--pico-foreground-color', 'currentColor');
+        const mutedColor = cssVar('--pico-muted-color', '#6b7280');
+        const borderColor = cssVar('--pico-border-color', '#d1d5db');
+        const gridColor  = cssVar('--pico-muted-border-color', '#e5e7eb');
+        const primary    = cssVar('--pico-primary', '#0ea5e9');
+
+        const layout = {
+          margin: { t: 16, r: 12, b: 40, l: 48 },
+          paper_bgcolor: 'rgba(0,0,0,0)',
+          plot_bgcolor: 'rgba(0,0,0,0)',
+          font: { family: fontFamily, size: 14, color: textColor },
+          xaxis: {
+            gridcolor: gridColor,
+            linecolor: borderColor,
+            tickfont: { color: mutedColor },
+            zeroline: false
+          },
+          yaxis: {
+            gridcolor: gridColor,
+            linecolor: borderColor,
+            tickfont: { color: mutedColor },
+            zeroline: false
+          },
+          legend: { font: { color: mutedColor } }
+        };
+
+        const trace = {
+          x, y,
+          type: 'scatter',
+          mode: 'lines+markers',
+          line: { width: 2, color: primary },
+          marker: { size: 6 }
+        };
+
+        Plotly.newPlot('value-chart', [trace], layout, { displayModeBar: false, responsive: true });
+        window.addEventListener('resize', () => Plotly.Plots.resize('value-chart'));
+      }
+
+      fetchAndPlot();
+
+      // call your existing plotting function again
+      window.addEventListener('bogle-theme-changed', () => {
+        fetchAndPlot();
+      });
     </script>
   </section>
 
