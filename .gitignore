@@ -1,4 +1,6 @@
 .venv/*
+.ruff_cache/*
+.vscode/*
 app/__pycache__/*
 db.sqlite
 pyproject.toml
