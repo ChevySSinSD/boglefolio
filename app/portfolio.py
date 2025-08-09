@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import Dict, List
 
 from .models import Transaction
 
@@ -16,14 +15,14 @@ class Lot:
 class Position:
     ticker: str
     quantity: float = 0.0
-    lots: List[Lot] = field(default_factory=list)
+    lots: list[Lot] = field(default_factory=list)
     realized_gain: float = 0.0
     basis: float = 0.0  # total cost basis of remaining shares
     market_value: float = 0.0
     unrealized_gain: float = 0.0
     avg_cost: float = 0.0
 
-def _consume_fifo(lots: List[Lot], sell_qty: float, sell_price: float, sell_fees: float) -> float:
+def _consume_fifo(lots: list[Lot], sell_qty: float, sell_price: float, sell_fees: float) -> float:
     realized = 0.0
     remaining = sell_qty
     while remaining > 1e-12 and lots:
@@ -39,7 +38,7 @@ def _consume_fifo(lots: List[Lot], sell_qty: float, sell_price: float, sell_fees
     realized -= sell_fees
     return realized
 
-def _consume_lifo(lots: List[Lot], sell_qty: float, sell_price: float, sell_fees: float) -> float:
+def _consume_lifo(lots: list[Lot], sell_qty: float, sell_price: float, sell_fees: float) -> float:
     realized = 0.0
     remaining = sell_qty
     while remaining > 1e-12 and lots:
@@ -55,16 +54,16 @@ def _consume_lifo(lots: List[Lot], sell_qty: float, sell_price: float, sell_fees
     realized -= sell_fees
     return realized
 
-def compute_positions(transactions: List[Transaction], prices: Dict[str, float] | None = None, method: str = "FIFO") -> Dict[str, Position]:
-    positions: Dict[str, Position] = {}
+def compute_positions(transactions: list[Transaction], prices: dict[str, float] | None = None, method: str = "FIFO") -> dict[str, Position]:
+    positions: dict[str, Position] = {}
     prices = prices or {}
-    by_ticker: Dict[str, List[Transaction]] = {}
+    by_ticker: dict[str, list[Transaction]] = {}
     for tx in transactions:
         by_ticker.setdefault(tx.ticker, []).append(tx)
     for ticker, txs in by_ticker.items():
         txs.sort(key=lambda t: (t.date, t.id))
         pos = Position(ticker=ticker)
-        lots: List[Lot] = []
+        lots: list[Lot] = []
         for tx in txs:
             if tx.type.lower() == "buy":
                 lots.append(Lot(qty=tx.quantity, price=tx.price, fees=tx.fees))

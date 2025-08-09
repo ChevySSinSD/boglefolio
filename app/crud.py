@@ -1,4 +1,3 @@
-from typing import List
 
 from sqlmodel import Session, select
 
@@ -11,7 +10,7 @@ def create_transaction(session: Session, tx: Transaction) -> Transaction:
     session.refresh(tx)
     return tx
 
-def get_transactions_for_account(session: Session, account_id: str) -> List[Transaction]:
+def get_transactions_for_account(session: Session, account_id: str) -> list[Transaction]:
     return session.exec(
         select(Transaction).where(Transaction.account_id == account_id).order_by(Transaction.date, Transaction.id)
     ).all()
