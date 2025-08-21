@@ -20,6 +20,16 @@ class AssetCreate(BaseModel):
     name: str | None = None
     currency: str = "USD"
     data_source: DataSource = DataSource.YAHOO
+    
+class AssetRead(BaseModel):
+    id: uuid.UUID
+    symbol: str
+    name: str | None = None
+    currency: str
+    data_source: DataSource
+
+    class Config:
+        from_attributes = True
 
 class AccountCreate(BaseModel):
     name: str | None = None
