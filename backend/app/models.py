@@ -44,7 +44,7 @@ class Account(SQLModel, table=True):
     name: str | None = Field(default=None, max_length=100)
     user_id: uuid.UUID = Field(foreign_key="user.id")
     user: "User" = Relationship(back_populates="accounts")
-    balance: float = Field(default=0)
+    balance: float | None = Field(default=0.0)
     transactions: list["Transaction"] = Relationship(back_populates="account")
 
 class Transaction(SQLModel, table=True):

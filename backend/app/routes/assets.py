@@ -18,7 +18,7 @@ def create_asset(asset: AssetCreate, session: Session = Depends(dependency=get_s
 
 @router.get(path="/", response_model=List[Asset])
 def read_assets(session: Session = Depends(dependency=get_session)) -> Sequence[Asset]:
-    assets: Sequence[Asset] = session.exec(statement=select(Asset)).all()
+    assets: List[Asset] = list(session.exec(statement=select(Asset)).all())
     return assets
 
 @router.get(path="/{asset_id}", response_model=Asset)

@@ -2,6 +2,7 @@ from fastapi import FastAPI
 from contextlib import asynccontextmanager
 from .database import create_db_and_tables
 from app.routes.assets import router as assets_router
+from app.routes.accounts import router as accounts_router
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -10,6 +11,7 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(title="Boglefolio", lifespan=lifespan)
 app.include_router(router=assets_router)
+app.include_router(accounts_router)
 
 @app.get(path="/")
 def read_root() -> dict[str, str]:
