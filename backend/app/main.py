@@ -1,3 +1,4 @@
+from typing import Any, AsyncGenerator
 from fastapi import FastAPI
 from contextlib import asynccontextmanager
 from .database import create_db_and_tables
@@ -7,7 +8,7 @@ from app.routes.users import router as users_router
 from app.routes.transactions import router as transactions_router
 
 @asynccontextmanager
-async def lifespan(app: FastAPI):
+async def lifespan(app: FastAPI) -> AsyncGenerator[None, Any]:
     create_db_and_tables()
     yield
 
