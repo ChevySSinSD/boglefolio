@@ -1,19 +1,20 @@
 from sqlmodel import SQLModel, Field, Relationship
 import uuid
 from datetime import datetime
-from enum import Enum
+# from enum import Enum
+from app.schemas import DataSource, TransactionType
 
-class DataSource(str, Enum):
-    #Define acceptable data sources for asset pricing.
-    YAHOO = "Yahoo"
-    MANUAL = "Manual"
-    OTHER = "Other"
+# class DataSource(str, Enum):
+#     #Define acceptable data sources for asset pricing.
+#     YAHOO = "Yahoo"
+#     MANUAL = "Manual"
+#     OTHER = "Other"
     
-class TransactionType(str, Enum):
-    # Define acceptable transaction types
-    BUY = "buy"
-    SELL = "sell"
-    DIVIDEND = "dividend"
+# class TransactionType(str, Enum):
+#     # Define acceptable transaction types
+#     BUY = "buy"
+#     SELL = "sell"
+#     DIVIDEND = "dividend"
 
 class Asset(SQLModel, table=True):
     """Table of assets held by users. One entry for each symbol/ticker and the source of pricing data
