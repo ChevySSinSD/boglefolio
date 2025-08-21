@@ -9,6 +9,6 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(title="Boglefolio", lifespan=lifespan)
 
-@app.get("/")
+@app.get(path="/")
 def read_root() -> dict[str, str]:
     return {"message": "Welcome to Boglefolio!"}
