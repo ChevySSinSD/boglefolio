@@ -2,8 +2,8 @@ from fastapi import APIRouter, HTTPException, status, Depends
 from sqlmodel import Session, select
 from app.models import Account
 from app.database import get_session
-from app.schemas import AccountCreate, AccountRead
-from typing import List, Sequence
+from app.schemas import AccountCreate, AccountRead, AccountUpdate
+from typing import Any, List, Sequence
 import uuid
 
 router = APIRouter(prefix="/accounts", tags=["accounts"])
@@ -35,3 +35,16 @@ def delete_account(account_id: uuid.UUID, session: Session = Depends(dependency=
         raise HTTPException(status_code=404, detail="Account not found")
     session.delete(instance=account)
     session.commit()
+
+@router.patch(path="/{account_id}", response_model=AccountRead)
+def update_account(account_id: uuid.UUID, account_update: AccountUpdate, session: Session = Depends(get_session)) -> AccountRead:
+    account: Account | None = session.get(entity=Account, ident=account_id)
+    if not account:
+        raise HTTPException(status_code=404, detail="Account not found")
+    account_data: dict[str, Any] = account_update.model_dump(exclude_unset=True)
+    for key, value in account_data.items():
+        setattr(account, key, value)
+    session.add(instance=account)
+    session.commit()
+    session.refresh(instance=account)
+    return AccountRead.model_validate(obj=account)

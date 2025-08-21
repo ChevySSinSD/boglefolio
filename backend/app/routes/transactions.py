@@ -2,7 +2,7 @@ from fastapi import APIRouter, HTTPException, status, Depends
 from sqlmodel import Session, select
 from app.models import Transaction
 from app.database import get_session
-from app.schemas import TransactionCreate, TransactionRead
+from app.schemas import TransactionCreate, TransactionRead, TransactionUpdate
 from typing import Any, List, Sequence
 import uuid
 from datetime import datetime
@@ -39,3 +39,16 @@ def delete_transaction(transaction_id: uuid.UUID, session: Session = Depends(dep
         raise HTTPException(status_code=404, detail="Transaction not found")
     session.delete(instance=transaction)
     session.commit()
+
+@router.patch(path="/{transaction_id}", response_model=TransactionRead)
+def update_transaction(transaction_id: uuid.UUID, transaction_update: TransactionUpdate, session: Session = Depends(get_session)) -> TransactionRead:
+    transaction: Transaction | None = session.get(entity=Transaction, ident=transaction_id)
+    if not transaction:
+        raise HTTPException(status_code=404, detail="Transaction not found")
+    transaction_data: dict[str, Any] = transaction_update.model_dump(exclude_unset=True)
+    for key, value in transaction_data.items():
+        setattr(transaction, key, value)
+    session.add(instance=transaction)
+    session.commit()
+    session.refresh(instance=transaction)
+    return TransactionRead.model_validate(obj=transaction)

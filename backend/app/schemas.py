@@ -31,6 +31,12 @@ class AssetRead(BaseModel):
     class Config:
         from_attributes = True
 
+class AssetUpdate(BaseModel):
+    symbol: str | None = None
+    name: str | None = None
+    currency: str | None = None
+    data_source: DataSource | None = None
+    
 class AccountCreate(BaseModel):
     name: str | None = None
     user_id: uuid.UUID
@@ -44,6 +50,11 @@ class AccountRead(BaseModel):
 
     class Config:
         from_attributes = True
+        
+class AccountUpdate(BaseModel):
+    name: str | None = None
+    user_id: uuid.UUID | None = None
+    balance: float | None = None
 
 class UserCreate(BaseModel):
     username: str
@@ -57,6 +68,10 @@ class UserRead(BaseModel):
     class Config:
         from_attributes = True
 
+class UserUpdate(BaseModel):
+    username: str | None = None
+    email: str | None = None
+    
 class TransactionCreate(BaseModel):
     asset_id: uuid.UUID
     account_id: uuid.UUID
@@ -77,3 +92,12 @@ class TransactionRead(BaseModel):
 
     class Config:
         from_attributes = True
+
+class TransactionUpdate(BaseModel):
+    asset_id: uuid.UUID | None = None
+    account_id: uuid.UUID | None = None
+    type: TransactionType | None = None
+    quantity: float | None = None
+    price: float | None = None
+    fee: float | None = None
+    date: datetime | None = None
