@@ -26,3 +26,15 @@ class AccountRead(BaseModel):
 
     class Config:
         from_attributes = True
+
+class UserCreate(BaseModel):
+    username: str
+    email: str | None = None
+
+class UserRead(BaseModel):
+    id: uuid.UUID
+    username: str
+    email: str | None = None
+
+    class Config:
+        from_attributes = True
