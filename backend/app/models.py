@@ -1,7 +1,7 @@
 from sqlmodel import SQLModel, Field, Relationship
 import uuid
 from datetime import datetime
-from app.schemas import DataSource, TransactionType
+from .schemas import DataSource, TransactionType
 
 class Asset(SQLModel, table=True):
     """Table of assets held by users. One entry for each symbol/ticker and the source of pricing data

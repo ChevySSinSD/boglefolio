@@ -1,8 +1,8 @@
 from fastapi import APIRouter, HTTPException, status, Depends
 from sqlmodel import Session, select
-from app.models import User
-from app.database import get_session
-from app.schemas import UserCreate, UserRead, UserUpdate
+from ..models import User
+from ..database import get_session
+from ..schemas import UserCreate, UserRead, UserUpdate
 from typing import Any, List, Sequence
 import uuid
 

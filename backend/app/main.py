@@ -2,10 +2,10 @@ from typing import Any, AsyncGenerator
 from fastapi import FastAPI
 from contextlib import asynccontextmanager
 from .database import create_db_and_tables
-from app.routes.assets import router as assets_router
-from app.routes.accounts import router as accounts_router
-from app.routes.users import router as users_router
-from app.routes.transactions import router as transactions_router
+from .routes.assets import router as assets_router
+from .routes.accounts import router as accounts_router
+from .routes.users import router as users_router
+from .routes.transactions import router as transactions_router
 
 @asynccontextmanager
 async def lifespan(app: FastAPI) -> AsyncGenerator[None, Any]:

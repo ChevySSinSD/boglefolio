@@ -1,9 +1,9 @@
 from fastapi import APIRouter, HTTPException, status, Depends
 from sqlmodel import Session, select
-from app.models import Asset
-from app.database import get_session
-from app.schemas import AssetCreate, AssetRead, AssetUpdate, DataSource
-from services.yahoo import get_yahoo_price
+from ..models import Asset
+from ..database import get_session
+from ..schemas import AssetCreate, AssetRead, AssetUpdate, DataSource
+from ...services.yahoo import get_yahoo_price
 from typing import Any, List, Sequence
 import uuid
 
