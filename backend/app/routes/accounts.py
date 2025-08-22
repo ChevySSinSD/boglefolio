@@ -17,8 +17,14 @@ def create_account(account: AccountCreate, session: Session = Depends(dependency
     return AccountRead.model_validate(obj=db_account)
 
 @router.get(path="/", response_model=List[AccountRead])
-def read_accounts(session: Session = Depends(dependency=get_session)) -> Sequence[AccountRead]:
-    accounts: Sequence[Account] = session.exec(statement=select(Account)).all()
+def read_accounts(
+    session: Session = Depends(dependency=get_session),
+    offset: int = 0,
+    limit: int = 100
+) -> Sequence[AccountRead]:
+    accounts: Sequence[Account] = session.exec(
+        statement=select(Account).offset(offset=offset).limit(limit=limit)
+    ).all()
     return [AccountRead.model_validate(obj=account) for account in accounts]
 
 @router.get(path="/{account_id}", response_model=AccountRead)

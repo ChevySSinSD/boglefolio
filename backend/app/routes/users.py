@@ -17,8 +17,14 @@ def create_user(user: UserCreate, session: Session = Depends(dependency=get_sess
     return UserRead.model_validate(obj=db_user)
 
 @router.get(path="/", response_model=List[UserRead])
-def read_users(session: Session = Depends(dependency=get_session)) -> Sequence[UserRead]:
-    users: Sequence[User] = session.exec(statement=select(User)).all()
+def read_users(
+    session: Session = Depends(dependency=get_session),
+    offset: int = 0,
+    limit: int = 100
+) -> Sequence[UserRead]:
+    users: Sequence[User] = session.exec(
+        statement=select(User).offset(offset=offset).limit(limit=limit)
+    ).all()
     return [UserRead.model_validate(obj=user) for user in users]
 
 @router.get(path="/{user_id}", response_model=UserRead)

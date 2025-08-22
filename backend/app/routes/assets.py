@@ -18,8 +18,14 @@ def create_asset(asset: AssetCreate, session: Session = Depends(dependency=get_s
     return AssetRead.model_validate(obj=db_asset)
 
 @router.get(path="/", response_model=List[AssetRead])
-def read_assets(session: Session = Depends(dependency=get_session)) -> Sequence[AssetRead]:
-    assets: Sequence[Asset] = session.exec(statement=select(Asset)).all()
+def read_assets(
+    session: Session = Depends(dependency=get_session),
+    offset: int = 0,
+    limit: int = 100
+) -> Sequence[AssetRead]:
+    assets: Sequence[Asset] = session.exec(
+        statement=select(Asset).offset(offset=offset).limit(limit=limit)
+    ).all()
     return [AssetRead.model_validate(obj=asset) for asset in assets]
 
 @router.get(path="/{asset_id}", response_model=AssetRead)

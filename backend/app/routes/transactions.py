@@ -21,8 +21,14 @@ def create_transaction(transaction: TransactionCreate, session: Session = Depend
     return TransactionRead.model_validate(obj=db_transaction)
 
 @router.get(path="/", response_model=List[TransactionRead])
-def read_transactions(session: Session = Depends(dependency=get_session)) -> Sequence[TransactionRead]:
-    transactions: Sequence[Transaction] = session.exec(statement=select(Transaction)).all()
+def read_transactions(
+    session: Session = Depends(dependency=get_session),
+    offset: int = 0,
+    limit: int = 100
+) -> Sequence[TransactionRead]:
+    transactions: Sequence[Transaction] = session.exec(
+        statement=select(Transaction).offset(offset=offset).limit(limit=limit)
+    ).all()
     return [TransactionRead.model_validate(obj=transaction) for transaction in transactions]
 
 @router.get(path="/{transaction_id}", response_model=TransactionRead)
