@@ -45,10 +45,10 @@ def get_asset_price(asset_id: uuid.UUID, session: Session = Depends(dependency=g
     if not asset:
         raise HTTPException(status_code=404, detail="Asset not found")
     if asset.data_source == DataSource.YAHOO:
-        price = get_yahoo_price(asset.symbol)
+        price: tuple[float, datetime] | None = get_yahoo_price(asset.symbol)
         if price is None:
             raise HTTPException(status_code=404, detail="Price not found on Yahoo")
-        return {"symbol": asset.symbol, "price": price}
+        return {"symbol": asset.symbol, "price": price[0], "price_time": price[1]}
     # For manual or other sources, implement your logic here
     raise HTTPException(status_code=400, detail="Manual price entry not implemented yet")
 
