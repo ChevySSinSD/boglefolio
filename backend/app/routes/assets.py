@@ -1,11 +1,15 @@
 from fastapi import APIRouter, HTTPException, status, Depends
+from pandas import DataFrame
+from datetime import datetime
 from sqlmodel import Session, select
 from ..models import Asset
 from ..database import get_session
 from ..schemas import AssetCreate, AssetRead, AssetUpdate, DataSource
-from ...services.yahoo import get_yahoo_price
+from ...services.yahoo import get_yahoo_price, get_yahoo_history
 from typing import Any, List, Sequence
 import uuid
+from enum import Enum
+from ..schemas import IntervalEnum
 
 router = APIRouter(prefix="/assets", tags=["assets"])
 
@@ -45,6 +49,25 @@ def get_asset_price(asset_id: uuid.UUID, session: Session = Depends(dependency=g
         if price is None:
             raise HTTPException(status_code=404, detail="Price not found on Yahoo")
         return {"symbol": asset.symbol, "price": price}
+    # For manual or other sources, implement your logic here
+    raise HTTPException(status_code=400, detail="Manual price entry not implemented yet")
+
+@router.get(path="/{asset_id}/history")
+def get_asset_history(
+    asset_id: uuid.UUID,
+    session: Session = Depends(dependency=get_session),
+    start: datetime | None = None,
+    end: datetime | None = datetime.now(),
+    interval: IntervalEnum | None = IntervalEnum.ONE_DAY
+) -> List[dict[str, Any]]:
+    asset: Asset | None = session.get(entity=Asset, ident=asset_id)
+    if not asset:
+        raise HTTPException(status_code=404, detail="Asset not found")
+    if asset.data_source == DataSource.YAHOO:
+        history: DataFrame = get_yahoo_history(symbol=asset.symbol, start=start, end=end, interval=interval)
+        if history is None or history.empty:
+            raise HTTPException(status_code=404, detail="History not found on Yahoo")
+        return history.reset_index().to_dict(orient="records")
     # For manual or other sources, implement your logic here
     raise HTTPException(status_code=400, detail="Manual price entry not implemented yet")
 
