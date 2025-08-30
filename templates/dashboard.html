@@ -1,0 +1,235 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard - Boglefolio{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1>
+        <span class="material-symbols-outlined">dashboard</span>
+        Portfolio Dashboard
+    </h1>
+    <p class="subtitle">Track your investment portfolio with the Bogleheads philosophy</p>
+</div>
+
+<!-- Stats Cards -->
+<div class="stats-grid">
+    <div class="card">
+        <div class="card-body">
+            <div class="stat">
+                <span class="material-symbols-outlined">people</span>
+                <div class="stat-details">
+                    <h3>{{ users_count }}</h3>
+                    <p>Users</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="card">
+        <div class="card-body">
+            <div class="stat">
+                <span class="material-symbols-outlined">trending_up</span>
+                <div class="stat-details">
+                    <h3>{{ assets_count }}</h3>
+                    <p>Assets</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="card">
+        <div class="card-body">
+            <div class="stat">
+                <span class="material-symbols-outlined">account_balance_wallet</span>
+                <div class="stat-details">
+                    <h3>{{ accounts_count }}</h3>
+                    <p>Accounts</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="card">
+        <div class="card-body">
+            <div class="stat">
+                <span class="material-symbols-outlined">receipt</span>
+                <div class="stat-details">
+                    <h3>{{ transactions_count }}</h3>
+                    <p>Transactions</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Recent Transactions -->
+<div class="card">
+    <div class="card-header">
+        <h2>Recent Transactions</h2>
+        <a href="/transactions" class="btn">View All</a>
+    </div>
+    <div class="card-body">
+        {% if recent_transactions %}
+        <div class="table-responsive">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Asset</th>
+                        <th>Type</th>
+                        <th>Quantity</th>
+                        <th>Price</th>
+                        <th>Total</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for transaction in recent_transactions %}
+                    <tr>
+                        <td>{{ transaction.date.strftime('%Y-%m-%d %H:%M') }}</td>
+                        <td>
+                            {% if transaction.asset %}
+                                {{ transaction.asset.symbol }}
+                                {% if transaction.asset.name %}
+                                    <small>({{ transaction.asset.name }})</small>
+                                {% endif %}
+                            {% else %}
+                                Unknown Asset
+                            {% endif %}
+                        </td>
+                        <td>
+                            <span class="badge {% if transaction.type == 'BUY' %}success{% elif transaction.type == 'SELL' %}warning{% else %}info{% endif %}">
+                                {{ transaction.type }}
+                            </span>
+                        </td>
+                        <td>{{ "%.2f"|format(transaction.quantity) }}</td>
+                        <td>${{ "%.2f"|format(transaction.price) }}</td>
+                        <td>${{ "%.2f"|format(transaction.quantity * transaction.price) }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="empty-state">
+            <span class="material-symbols-outlined">receipt</span>
+            <h3>No transactions yet</h3>
+            <p>Start by adding users, assets, and accounts, then record transactions.</p>
+            <a href="/transactions" class="btn primary">Add Transaction</a>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Quick Actions -->
+<div class="card">
+    <div class="card-header">
+        <h2>Quick Actions</h2>
+    </div>
+    <div class="card-body">
+        <div class="quick-actions">
+            <a href="/users" class="btn outline">
+                <span class="material-symbols-outlined">person_add</span>
+                Manage Users
+            </a>
+            <a href="/assets" class="btn outline">
+                <span class="material-symbols-outlined">add_chart</span>
+                Add Assets
+            </a>
+            <a href="/accounts" class="btn outline">
+                <span class="material-symbols-outlined">account_balance_wallet</span>
+                Manage Accounts
+            </a>
+            <a href="/transactions" class="btn primary">
+                <span class="material-symbols-outlined">add</span>
+                Add Transaction
+            </a>
+        </div>
+    </div>
+</div>
+
+<style>
+.page-header {
+    margin-bottom: 2rem;
+}
+
+.page-header h1 {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 0.5rem;
+}
+
+.subtitle {
+    color: var(--text-secondary);
+    margin: 0;
+}
+
+.stat {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.stat .material-symbols-outlined {
+    font-size: 2rem;
+    color: var(--primary);
+}
+
+.stat-details h3 {
+    margin: 0;
+    font-size: 2rem;
+    font-weight: bold;
+}
+
+.stat-details p {
+    margin: 0;
+    color: var(--text-secondary);
+}
+
+.empty-state {
+    text-align: center;
+    padding: 2rem;
+}
+
+.empty-state .material-symbols-outlined {
+    font-size: 3rem;
+    color: var(--text-disabled);
+    margin-bottom: 1rem;
+}
+
+.quick-actions {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+.quick-actions .btn {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.badge {
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    font-weight: bold;
+    text-transform: uppercase;
+}
+
+.badge.success {
+    background-color: var(--success);
+    color: white;
+}
+
+.badge.warning {
+    background-color: var(--warning);
+    color: white;
+}
+
+.badge.info {
+    background-color: var(--info);
+    color: white;
+}
+</style>
+{% endblock %}

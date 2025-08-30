@@ -1,0 +1,290 @@
+{% extends "base.html" %}
+
+{% block title %}Assets - Boglefolio{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1>
+        <span class="material-symbols-outlined">trending_up</span>
+        Assets Management
+    </h1>
+    <button class="btn primary" onclick="document.getElementById('add-asset-modal').showModal()">
+        <span class="material-symbols-outlined">add</span>
+        Add Asset
+    </button>
+</div>
+
+<!-- Assets Table -->
+<div class="card" id="assets-table">
+    <div class="card-body">
+        {% if assets %}
+        <div class="table-responsive">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Symbol</th>
+                        <th>Name</th>
+                        <th>Currency</th>
+                        <th>Data Source</th>
+                        <th>ID</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for asset in assets %}
+                    <tr>
+                        <td><strong>{{ asset.symbol }}</strong></td>
+                        <td>{{ asset.name or '-' }}</td>
+                        <td>{{ asset.currency }}</td>
+                        <td>
+                            <span class="badge {% if asset.data_source == 'YAHOO' %}success{% else %}secondary{% endif %}">
+                                {{ asset.data_source }}
+                            </span>
+                        </td>
+                        <td><code>{{ asset.id }}</code></td>
+                        <td>
+                            <div class="table-actions">
+                                <button class="btn outline small">
+                                    <span class="material-symbols-outlined">visibility</span>
+                                    Price
+                                </button>
+                                <button class="btn outline small">
+                                    <span class="material-symbols-outlined">edit</span>
+                                    Edit
+                                </button>
+                                <button class="btn error small">
+                                    <span class="material-symbols-outlined">delete</span>
+                                    Delete
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="empty-state">
+            <span class="material-symbols-outlined">trending_up</span>
+            <h3>No assets yet</h3>
+            <p>Add investment assets like stocks, ETFs, or bonds to start tracking your portfolio.</p>
+            <button class="btn primary" onclick="document.getElementById('add-asset-modal').showModal()">
+                <span class="material-symbols-outlined">add</span>
+                Add Asset
+            </button>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Add Asset Modal -->
+<dialog id="add-asset-modal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2>Add New Asset</h2>
+            <button class="btn icon" onclick="this.closest('dialog').close()">
+                <span class="material-symbols-outlined">close</span>
+            </button>
+        </div>
+        
+        <form hx-post="/assets" hx-target="#assets-table" hx-swap="outerHTML" onsubmit="this.closest('dialog').close()">
+            <div class="modal-body">
+                <div class="form-group">
+                    <label for="symbol">Symbol *</label>
+                    <input type="text" id="symbol" name="symbol" required placeholder="e.g., VTSAX, VTI" maxlength="10" style="text-transform: uppercase;">
+                    <small>Ticker symbol (will be converted to uppercase)</small>
+                </div>
+                
+                <div class="form-group">
+                    <label for="name">Name</label>
+                    <input type="text" id="name" name="name" placeholder="e.g., Vanguard Total Stock Market Index Fund" maxlength="100">
+                </div>
+                
+                <div class="form-group">
+                    <label for="currency">Currency</label>
+                    <select id="currency" name="currency">
+                        <option value="USD" selected>USD - US Dollar</option>
+                        <option value="EUR">EUR - Euro</option>
+                        <option value="GBP">GBP - British Pound</option>
+                        <option value="CAD">CAD - Canadian Dollar</option>
+                        <option value="JPY">JPY - Japanese Yen</option>
+                    </select>
+                </div>
+            </div>
+            
+            <div class="modal-footer">
+                <button type="button" class="btn outline" onclick="this.closest('dialog').close()">Cancel</button>
+                <button type="submit" class="btn primary">
+                    <span class="material-symbols-outlined">add</span>
+                    Add Asset
+                </button>
+            </div>
+        </form>
+    </div>
+</dialog>
+
+<style>
+.page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+}
+
+.page-header h1 {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin: 0;
+}
+
+.empty-state {
+    text-align: center;
+    padding: 3rem 2rem;
+}
+
+.empty-state .material-symbols-outlined {
+    font-size: 4rem;
+    color: var(--text-disabled);
+    margin-bottom: 1rem;
+}
+
+.empty-state h3 {
+    margin: 0 0 0.5rem 0;
+}
+
+.empty-state p {
+    color: var(--text-secondary);
+    margin: 0 0 2rem 0;
+}
+
+.table-actions {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.btn.small {
+    padding: 0.25rem 0.5rem;
+    font-size: 0.875rem;
+}
+
+.btn.small .material-symbols-outlined {
+    font-size: 1rem;
+}
+
+.badge {
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    font-weight: bold;
+    text-transform: uppercase;
+}
+
+.badge.success {
+    background-color: var(--success);
+    color: white;
+}
+
+.badge.secondary {
+    background-color: var(--text-disabled);
+    color: white;
+}
+
+.modal {
+    border: none;
+    border-radius: 8px;
+    padding: 0;
+    max-width: 500px;
+    width: 90vw;
+}
+
+.modal::backdrop {
+    background-color: rgba(0, 0, 0, 0.5);
+}
+
+.modal-content {
+    padding: 0;
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1.5rem 1.5rem 0 1.5rem;
+}
+
+.modal-header h2 {
+    margin: 0;
+}
+
+.modal-body {
+    padding: 1.5rem;
+}
+
+.modal-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 1rem;
+    padding: 0 1.5rem 1.5rem 1.5rem;
+}
+
+.form-group {
+    margin-bottom: 1rem;
+}
+
+.form-group:last-child {
+    margin-bottom: 0;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+}
+
+.form-group input,
+.form-group select {
+    width: 100%;
+    padding: 0.75rem;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    font-size: 1rem;
+}
+
+.form-group input:focus,
+.form-group select:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 2px rgba(var(--primary-rgb), 0.1);
+}
+
+.form-group small {
+    display: block;
+    margin-top: 0.25rem;
+    color: var(--text-secondary);
+    font-size: 0.875rem;
+}
+
+code {
+    font-family: 'Courier New', monospace;
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+}
+
+input[style*="text-transform: uppercase"] {
+    text-transform: uppercase;
+}
+</style>
+
+<script>
+// Auto-uppercase symbol input
+document.addEventListener('DOMContentLoaded', function() {
+    const symbolInput = document.getElementById('symbol');
+    if (symbolInput) {
+        symbolInput.addEventListener('input', function() {
+            this.value = this.value.toUpperCase();
+        });
+    }
+});
+</script>
+{% endblock %}

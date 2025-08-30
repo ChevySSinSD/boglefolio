@@ -1,0 +1,466 @@
+{% extends "base.html" %}
+
+{% block title %}Transactions - Boglefolio{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1>
+        <span class="material-symbols-outlined">receipt</span>
+        Transactions Management
+    </h1>
+    <div class="header-actions">
+        <button class="btn outline" onclick="document.getElementById('import-csv-modal').showModal()">
+            <span class="material-symbols-outlined">upload_file</span>
+            Import CSV
+        </button>
+        <button class="btn primary" onclick="document.getElementById('add-transaction-modal').showModal()">
+            <span class="material-symbols-outlined">add</span>
+            Add Transaction
+        </button>
+    </div>
+</div>
+
+<!-- Transactions Table -->
+<div class="card" id="transactions-table">
+    <div class="card-body">
+        {% if transactions %}
+        <div class="table-responsive">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Asset</th>
+                        <th>Account</th>
+                        <th>Type</th>
+                        <th>Quantity</th>
+                        <th>Price</th>
+                        <th>Fee</th>
+                        <th>Total</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for transaction in transactions %}
+                    <tr>
+                        <td>{{ transaction.date.strftime('%Y-%m-%d') }}<br><small>{{ transaction.date.strftime('%H:%M') }}</small></td>
+                        <td>
+                            {% if transaction.asset %}
+                                <strong>{{ transaction.asset.symbol }}</strong>
+                                {% if transaction.asset.name %}
+                                    <br><small>{{ transaction.asset.name }}</small>
+                                {% endif %}
+                            {% else %}
+                                <em>Unknown Asset</em>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if transaction.account %}
+                                {{ transaction.account.name or 'Unnamed' }}
+                                {% if transaction.account.user %}
+                                    <br><small>{{ transaction.account.user.username }}</small>
+                                {% endif %}
+                            {% else %}
+                                <em>Unknown Account</em>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <span class="badge {% if transaction.type == 'BUY' %}success{% elif transaction.type == 'SELL' %}warning{% else %}info{% endif %}">
+                                {{ transaction.type }}
+                            </span>
+                        </td>
+                        <td>{{ "%.4f"|format(transaction.quantity) }}</td>
+                        <td>${{ "%.2f"|format(transaction.price) }}</td>
+                        <td>${{ "%.2f"|format(transaction.fee) }}</td>
+                        <td class="total">
+                            ${{ "%.2f"|format(transaction.quantity * transaction.price + transaction.fee) }}
+                        </td>
+                        <td>
+                            <div class="table-actions">
+                                <button class="btn outline small">
+                                    <span class="material-symbols-outlined">edit</span>
+                                    Edit
+                                </button>
+                                <button class="btn error small">
+                                    <span class="material-symbols-outlined">delete</span>
+                                    Delete
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="empty-state">
+            <span class="material-symbols-outlined">receipt</span>
+            <h3>No transactions yet</h3>
+            <p>Record your first investment transaction to start tracking your portfolio.</p>
+            {% if not assets or not accounts %}
+            <p><em>Note: You need assets and accounts before recording transactions.</em></p>
+            <div class="empty-actions">
+                {% if not assets %}
+                <a href="/assets" class="btn outline">
+                    <span class="material-symbols-outlined">trending_up</span>
+                    Add Assets
+                </a>
+                {% endif %}
+                {% if not accounts %}
+                <a href="/accounts" class="btn outline">
+                    <span class="material-symbols-outlined">account_balance_wallet</span>
+                    Add Accounts
+                </a>
+                {% endif %}
+            </div>
+            {% else %}
+            <button class="btn primary" onclick="document.getElementById('add-transaction-modal').showModal()">
+                <span class="material-symbols-outlined">add</span>
+                Add Transaction
+            </button>
+            {% endif %}
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Add Transaction Modal -->
+<dialog id="add-transaction-modal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2>Add New Transaction</h2>
+            <button class="btn icon" onclick="this.closest('dialog').close()">
+                <span class="material-symbols-outlined">close</span>
+            </button>
+        </div>
+        
+        <form hx-post="/transactions" hx-target="#transactions-table" hx-swap="outerHTML" onsubmit="this.closest('dialog').close()">
+            <div class="modal-body">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="asset_id">Asset *</label>
+                        <select id="asset_id" name="asset_id" required>
+                            <option value="">Select an asset...</option>
+                            {% for asset in assets %}
+                            <option value="{{ asset.id }}">{{ asset.symbol }}{% if asset.name %} - {{ asset.name }}{% endif %}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="account_id">Account *</label>
+                        <select id="account_id" name="account_id" required>
+                            <option value="">Select an account...</option>
+                            {% for account in accounts %}
+                            <option value="{{ account.id }}">{{ account.name or 'Unnamed' }}{% if account.user %} ({{ account.user.username }}){% endif %}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="type">Type *</label>
+                        <select id="type" name="type" required>
+                            <option value="BUY">BUY</option>
+                            <option value="SELL">SELL</option>
+                            <option value="DIVIDEND">DIVIDEND</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="quantity">Quantity *</label>
+                        <input type="number" id="quantity" name="quantity" step="0.0001" min="0" required placeholder="0.0000">
+                    </div>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="price">Price *</label>
+                        <input type="number" id="price" name="price" step="0.01" min="0" required placeholder="0.00">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="fee">Fee</label>
+                        <input type="number" id="fee" name="fee" step="0.01" min="0" value="0.00" placeholder="0.00">
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="date">Date</label>
+                    <input type="datetime-local" id="date" name="date">
+                    <small>Leave empty to use current date/time</small>
+                </div>
+            </div>
+            
+            <div class="modal-footer">
+                <button type="button" class="btn outline" onclick="this.closest('dialog').close()">Cancel</button>
+                <button type="submit" class="btn primary" {% if not assets or not accounts %}disabled{% endif %}>
+                    <span class="material-symbols-outlined">add</span>
+                    Add Transaction
+                </button>
+            </div>
+        </form>
+    </div>
+</dialog>
+
+<!-- Import CSV Modal -->
+<dialog id="import-csv-modal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2>Import Transactions from CSV</h2>
+            <button class="btn icon" onclick="this.closest('dialog').close()">
+                <span class="material-symbols-outlined">close</span>
+            </button>
+        </div>
+        
+        <div class="modal-body">
+            <div class="import-info">
+                <h4>CSV Format Requirements:</h4>
+                <p>Your CSV file should have the following columns:</p>
+                <ul>
+                    <li><strong>asset_id</strong> - UUID of the asset</li>
+                    <li><strong>account_id</strong> - UUID of the account</li>
+                    <li><strong>type</strong> - BUY, SELL, or DIVIDEND</li>
+                    <li><strong>quantity</strong> - Number of shares/units</li>
+                    <li><strong>price</strong> - Price per unit</li>
+                    <li><strong>fee</strong> - Transaction fee (optional)</li>
+                    <li><strong>date</strong> - Date in YYYY-MM-DD HH:MM:SS format</li>
+                </ul>
+            </div>
+            
+            <div class="form-group">
+                <label for="csv-file">Select CSV File</label>
+                <input type="file" id="csv-file" accept=".csv" />
+            </div>
+        </div>
+        
+        <div class="modal-footer">
+            <button type="button" class="btn outline" onclick="this.closest('dialog').close()">Cancel</button>
+            <button type="button" class="btn primary" onclick="alert('CSV import functionality will be implemented in a future update')">
+                <span class="material-symbols-outlined">upload</span>
+                Import CSV
+            </button>
+        </div>
+    </div>
+</dialog>
+
+<style>
+.page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+}
+
+.page-header h1 {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin: 0;
+}
+
+.header-actions {
+    display: flex;
+    gap: 1rem;
+}
+
+.empty-state {
+    text-align: center;
+    padding: 3rem 2rem;
+}
+
+.empty-state .material-symbols-outlined {
+    font-size: 4rem;
+    color: var(--text-disabled);
+    margin-bottom: 1rem;
+}
+
+.empty-state h3 {
+    margin: 0 0 0.5rem 0;
+}
+
+.empty-state p {
+    color: var(--text-secondary);
+    margin: 0 0 1rem 0;
+}
+
+.empty-actions {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    margin-bottom: 2rem;
+}
+
+.total {
+    font-weight: 600;
+    color: var(--primary);
+}
+
+.table-actions {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.btn.small {
+    padding: 0.25rem 0.5rem;
+    font-size: 0.875rem;
+}
+
+.btn.small .material-symbols-outlined {
+    font-size: 1rem;
+}
+
+.badge {
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    font-weight: bold;
+    text-transform: uppercase;
+}
+
+.badge.success {
+    background-color: var(--success);
+    color: white;
+}
+
+.badge.warning {
+    background-color: var(--warning);
+    color: white;
+}
+
+.badge.info {
+    background-color: var(--info);
+    color: white;
+}
+
+.modal {
+    border: none;
+    border-radius: 8px;
+    padding: 0;
+    max-width: 600px;
+    width: 90vw;
+}
+
+.modal::backdrop {
+    background-color: rgba(0, 0, 0, 0.5);
+}
+
+.modal-content {
+    padding: 0;
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1.5rem 1.5rem 0 1.5rem;
+}
+
+.modal-header h2 {
+    margin: 0;
+}
+
+.modal-body {
+    padding: 1.5rem;
+}
+
+.modal-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 1rem;
+    padding: 0 1.5rem 1.5rem 1.5rem;
+}
+
+.form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+.form-group {
+    margin-bottom: 1rem;
+}
+
+.form-group:last-child {
+    margin-bottom: 0;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+}
+
+.form-group input,
+.form-group select {
+    width: 100%;
+    padding: 0.75rem;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    font-size: 1rem;
+}
+
+.form-group input:focus,
+.form-group select:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 2px rgba(var(--primary-rgb), 0.1);
+}
+
+.form-group small {
+    display: block;
+    margin-top: 0.25rem;
+    color: var(--text-secondary);
+    font-size: 0.875rem;
+}
+
+.import-info {
+    background-color: var(--surface);
+    padding: 1rem;
+    border-radius: 4px;
+    margin-bottom: 1rem;
+}
+
+.import-info h4 {
+    margin: 0 0 0.5rem 0;
+}
+
+.import-info p {
+    margin: 0 0 0.5rem 0;
+    color: var(--text-secondary);
+}
+
+.import-info ul {
+    margin: 0;
+    padding-left: 1.5rem;
+}
+
+.import-info li {
+    margin-bottom: 0.25rem;
+    color: var(--text-secondary);
+}
+
+code {
+    font-family: 'Courier New', monospace;
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+}
+
+.btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+@media (max-width: 768px) {
+    .form-row {
+        grid-template-columns: 1fr;
+    }
+    
+    .header-actions {
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+}
+</style>
+{% endblock %}
