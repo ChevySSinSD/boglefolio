@@ -3,57 +3,46 @@ import uuid
 from datetime import datetime
 from sqlmodel import Session, select
 from .models import Transaction, TransactionType, Account, Asset
-from fastapi import HTTPException
-from typing import Dict, List, Union, TypedDict
+from typing import List
+import logging
 
-class ImportResult(TypedDict):
-    created: int
-    updated: int
-    skipped: int
-    errors: List[str]
+# Set up logging
+logging.basicConfig(level=logging.INFO)
+logger: logging.Logger = logging.getLogger(name=__name__)
 
-def import_transactions_from_csv(csv_path: str, session: Session) -> ImportResult:
+def process_csv_import(reader: csv.DictReader, session: Session) -> None:
     """
     Import transactions from a CSV file. If a transaction with the same account_id, asset_id, type, quantity, price, fee, and date exists, update it.
     """
-    updated = 0
     created = 0
+    updated = 0
     skipped = 0
-    errors: list[str] = []
-
-    with open(csv_path, newline="") as csvfile:
-        reader: csv.DictReader[str] = csv.DictReader(csvfile)
-        for row_num, row in enumerate(reader, start=2):  # start=2 for header row
-            try:
-                # Parse fields from CSV
-                asset_id = uuid.UUID(row["asset_id"])
-                account_id = uuid.UUID(row["account_id"])
-                type_ = TransactionType(row["type"])
-                quantity = float(row["quantity"])
-                price = float(row["price"])
-                fee = float(row.get("fee", 0))
-                date: datetime = datetime.fromisoformat(row["date"])
-            except (ValueError, KeyError) as e:
-                msg = f"Row {row_num}: Parse error: {e} | Row: {row}"
-                print(msg)
-                errors.append(msg)
-                skipped += 1
-                continue
-
-            # Check that asset and account exist
+    errors: List[str] = []
+    
+    batch_size = 100  # Process in chunks
+    batch: List[int] = []
+    
+    for row_num, row in enumerate(iterable=reader, start=2):
+        try:
+            # Parse fields
+            asset_id = uuid.UUID(row["asset_id"])
+            account_id = uuid.UUID(row["account_id"])
+            type_ = TransactionType(row["type"])
+            quantity = float(row["quantity"])
+            price = float(row["price"])
+            fee = float(row.get("fee", 0))
+            date = datetime.fromisoformat(row["date"])
+            
+            # Validate existence
             if not session.get(Account, account_id):
-                msg = f"Row {row_num}: account_id {account_id} does not exist."
-                print(msg)
-                errors.append(msg)
+                errors.append(f"Row {row_num}: Account {account_id} not found.")
                 skipped += 1
                 continue
             if not session.get(Asset, asset_id):
-                msg = f"Row {row_num}: asset_id {asset_id} does not exist."
-                print(msg)
-                errors.append(msg)
+                errors.append(f"Row {row_num}: Asset {asset_id} not found.")
                 skipped += 1
                 continue
-
+            
             # Check for duplicate
             statement = select(Transaction).where(
                 Transaction.account_id == account_id,
@@ -65,16 +54,14 @@ def import_transactions_from_csv(csv_path: str, session: Session) -> ImportResul
                 Transaction.date == date,
             )
             existing = session.exec(statement).first()
-
+            
             if existing:
-                # Update existing transaction (customize fields as needed)
                 existing.price = price
                 existing.quantity = quantity
                 existing.fee = fee
-                session.add(instance=existing)
+                session.add(existing)
                 updated += 1
             else:
-                # Create new transaction
                 transaction = Transaction(
                     asset_id=asset_id,
                     account_id=account_id,
@@ -84,19 +71,29 @@ def import_transactions_from_csv(csv_path: str, session: Session) -> ImportResul
                     fee=fee,
                     date=date,
                 )
-                session.add(instance=transaction)
+                session.add(transaction)
                 created += 1
-
+            
+            batch.append(row_num)
+            if len(batch) >= batch_size:
+                session.commit()
+                logger.info(f"Committed batch of {len(batch)} rows.")
+                batch = []
+        
+        except Exception as e:
+            errors.append(f"Row {row_num}: {str(e)}")
+            skipped += 1
+            logger.error(f"Error on row {row_num}: {e}")
+            # Removed session.rollback() to avoid undoing previous commits
+    
+    # Commit remaining batch
+    if batch:
         session.commit()
-    result = {
-        "created": created,
-        "updated": updated,
-        "skipped": skipped,
-        "errors": errors
-    }
-    if result["created"] == 0 and result["updated"] == 0:
-        raise HTTPException(
-            status_code=400,
-            detail={"message": "No transactions imported.", "errors": result["errors"]}
-        )
-    return result  # HTTP 200 if at least one success
+        logger.info(f"Committed final batch of {len(batch)} rows.")
+    
+    # Log summary
+    logger.info(f"Import complete: {created} created, {updated} updated, {skipped} skipped.")
+    if errors:
+        logger.warning(f"Errors: {errors}")
+    
+    # Optional: Send notification (e.g., email) here
