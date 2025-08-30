@@ -2,7 +2,7 @@
 
 A self-hosted investment portfolio tracker inspired by the Bogleheads philosophy of long-term, low-cost investing. Built with FastAPI and SQLModel for a robust backend, supporting CSV imports, Yahoo Finance integration, and future Plaid API connectivity.
 
-## Features
+## Current Features
 
 - **Portfolio Management:** Track assets, accounts, transactions, and users with full CRUD operations.
 - **CSV Import:** Easily import transactions from CSV files with duplicate detection and error handling.
@@ -12,14 +12,21 @@ A self-hosted investment portfolio tracker inspired by the Bogleheads philosophy
 - **Authentication:** (Planned) Secure user access with JWT.
 - **Performance Analytics:** (Planned) View portfolio performance over time with charts and reports.
 
-## Installation
+## Usage
+**API Endpoints:**
+- Assets: /assets - Manage investment assets (CRUD).
+- Accounts: /accounts - Manage user accounts (CRUD).
+- Transactions: /transactions - Manage transactions (CRUD, CSV import).
+- Users: /users - Manage users (CRUD).
 
-### Prerequisites
-- Python 3.8+
-- SQLite (included with Python)
+**Example: Import Transactions from CSV**
+Prepare a CSV with columns: asset_id, account_id, type, quantity, price, fee, date.
+Use the /transactions/import-csv endpoint to upload and process the file asynchronously.
 
-### Setup
-1. Clone the repository:
-   ```bash
-   git clone https://github.com/ChevySSinSD/boglefolio.git
-   cd boglefolio
+## Future Features / Roadmap
+
+- Daily portfolio snapshots.
+- Plaid API integration.
+- User authentication.
+- Frontend dashboard.
+- Performance charts.
