@@ -25,10 +25,11 @@ class DataSource(str, Enum):
     OTHER = "Other"
 
 class TransactionType(str, Enum):
-    BUY = "buy"
-    SELL = "sell"
-    DIVIDEND = "dividend"
-    TRANSFER = "transfer"
+    BUY = "Buy"
+    SELL = "Sell"
+    INTEREST_EARNED = "Interest Earned"
+    DIVIDEND_EARNED = "Dividend Earned"
+    DIVIDEND_REINVESTED = "Dividend Reinvested"
 
 class AssetCreate(BaseModel):
     symbol: str

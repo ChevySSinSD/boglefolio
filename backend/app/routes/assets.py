@@ -15,6 +15,10 @@ router = APIRouter(prefix="/assets", tags=["assets"])
 
 @router.post(path="/", response_model=AssetRead, status_code=status.HTTP_201_CREATED)
 def create_asset(asset: AssetCreate, session: Session = Depends(dependency=get_session)) -> AssetRead:
+    # Check for duplicate by symbol (or other unique field)
+    existing_asset = session.exec(select(Asset).where(Asset.symbol == asset.symbol)).first()
+    if existing_asset:
+        raise HTTPException(status_code=409, detail="Asset with this symbol already exists")
     db_asset: Asset = Asset.model_validate(obj=asset)
     session.add(instance=db_asset)
     session.commit()

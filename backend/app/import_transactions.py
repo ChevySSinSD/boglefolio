@@ -4,8 +4,15 @@ from datetime import datetime
 from sqlmodel import Session, select
 from .models import Transaction, TransactionType, Account, Asset
 from fastapi import HTTPException
+from typing import Dict, List, Union, TypedDict
 
-def import_transactions_from_csv(csv_path: str, session: Session) -> dict[str, int | list[str]]:
+class ImportResult(TypedDict):
+    created: int
+    updated: int
+    skipped: int
+    errors: List[str]
+
+def import_transactions_from_csv(csv_path: str, session: Session) -> ImportResult:
     """
     Import transactions from a CSV file. If a transaction with the same account_id, asset_id, type, quantity, price, fee, and date exists, update it.
     """
