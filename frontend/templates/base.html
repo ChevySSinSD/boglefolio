@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Boglefolio{% endblock %}</title>
+    
+    <!-- beer.css for styling -->
+    <script src="https://cdn.jsdelivr.net/npm/beercss@3/dist/cdn/beer.min.js" integrity="sha256-/MSW4rvJfZGiucLaOKOgMH2Ti7fvV3Kk2dgovfS/ziI=" crossorigin="anonymous"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/beercss@3/dist/cdn/beer.min.css" integrity="sha256-Ppu2HFBkfd1D4H1cxDR+xHd2cdyqNis34WSOPL30g7Y=" crossorigin="anonymous">
+    
+    <!-- Material Symbols for icons -->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
+    
+    <!-- HTMX for dynamic interactions -->
+    <script src="https://unpkg.com/htmx.org@2.0.5/dist/htmx.min.js"></script>
+</head>
+<body class="dark">
+    <!-- Navigation -->
+    <nav class="top">
+        <h5 class="max">
+            <i>account_balance</i>
+            <span>Boglefolio</span>
+        </h5>
+        
+        <a href="/" class="{% if request.url.path == '/' %}active{% endif %}">
+            <i>dashboard</i>
+            <span>Dashboard</span>
+        </a>
+        <a href="/users" class="{% if '/users' in request.url.path %}active{% endif %}">
+            <i>people</i>
+            <span>Users</span>
+        </a>
+        <a href="/assets" class="{% if '/assets' in request.url.path %}active{% endif %}">
+            <i>trending_up</i>
+            <span>Assets</span>
+        </a>
+        <a href="/accounts" class="{% if '/accounts' in request.url.path %}active{% endif %}">
+            <i>account_balance_wallet</i>
+            <span>Accounts</span>
+        </a>
+        <a href="/transactions" class="{% if '/transactions' in request.url.path %}active{% endif %}">
+            <i>receipt</i>
+            <span>Transactions</span>
+        </a>
+        
+        <!-- Theme Toggle -->
+        <label class="switch icon">
+            <input type="checkbox" class="theme">
+            <span>
+                <i>dark_mode</i>
+            </span>
+        </label>
+        
+        <!-- Color Palette Menu -->
+        <button data-ui="#color-menu">
+            <i>palette</i>
+        </button>
+        
+        <!-- GitHub Link -->
+        <a href="https://github.com/ChevySSinSD/boglefolio" target="_blank" rel="noopener noreferrer">
+            <i>code</i>
+        </a>
+    </nav>
+
+    <!-- Color Palette Menu -->
+    <menu id="color-menu" class="min">
+        <h6 class="small">Theme Colors</h6>
+        <div class="row">
+            <div class="grid">
+                <label class="radio">
+                    <input type="radio" name="color" value="" class="color" checked>
+                    <span class="default"></span>
+                </label>
+                <label class="radio">
+                    <input type="radio" name="color" value="red" class="color">
+                    <span class="red"></span>
+                </label>
+                <label class="radio">
+                    <input type="radio" name="color" value="pink" class="color">
+                    <span class="pink"></span>
+                </label>
+                <label class="radio">
+                    <input type="radio" name="color" value="purple" class="color">
+                    <span class="purple"></span>
+                </label>
+                <label class="radio">
+                    <input type="radio" name="color" value="deep-purple" class="color">
+                    <span class="deep-purple"></span>
+                </label>
+                <label class="radio">
+                    <input type="radio" name="color" value="indigo" class="color">
+                    <span class="indigo"></span>
+                </label>
+                <label class="radio">
+                    <input type="radio" name="color" value="blue" class="color">
+                    <span class="blue"></span>
+                </label>
+                <label class="radio">
+                    <input type="radio" name="color" value="light-blue" class="color">
+                    <span class="light-blue"></span>
+                </label>
+                <label class="radio">
+                    <input type="radio" name="color" value="cyan" class="color">
+                    <span class="cyan"></span>
+                </label>
+                <label class="radio">
+                    <input type="radio" name="color" value="teal" class="color">
+                    <span class="teal"></span>
+                </label>
+                <label class="radio">
+                    <input type="radio" name="color" value="green" class="color">
+                    <span class="green"></span>
+                </label>
+                <label class="radio">
+                    <input type="radio" name="color" value="light-green" class="color">
+                    <span class="light-green"></span>
+                </label>
+                <label class="radio">
+                    <input type="radio" name="color" value="lime" class="color">
+                    <span class="lime"></span>
+                </label>
+                <label class="radio">
+                    <input type="radio" name="color" value="yellow" class="color">
+                    <span class="yellow"></span>
+                </label>
+                <label class="radio">
+                    <input type="radio" name="color" value="amber" class="color">
+                    <span class="amber"></span>
+                </label>
+                <label class="radio">
+                    <input type="radio" name="color" value="orange" class="color">
+                    <span class="orange"></span>
+                </label>
+                <label class="radio">
+                    <input type="radio" name="color" value="deep-orange" class="color">
+                    <span class="deep-orange"></span>
+                </label>
+                <label class="radio">
+                    <input type="radio" name="color" value="brown" class="color">
+                    <span class="brown"></span>
+                </label>
+                <label class="radio">
+                    <input type="radio" name="color" value="grey" class="color">
+                    <span class="grey"></span>
+                </label>
+                <label class="radio">
+                    <input type="radio" name="color" value="blue-grey" class="color">
+                    <span class="blue-grey"></span>
+                </label>
+            </div>
+        </div>
+    </menu>
+
+    <!-- Main Content -->
+    <main class="responsive">
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- HTMX Loading indicator -->
+    <script>
+        document.body.addEventListener('htmx:beforeRequest', function(evt) {
+            evt.target.style.opacity = '0.5';
+        });
+        
+        document.body.addEventListener('htmx:afterRequest', function(evt) {
+            evt.target.style.opacity = '1';
+        });
+    </script>
+</body>
+</html>

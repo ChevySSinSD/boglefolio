@@ -1,0 +1,81 @@
+{% extends "base.html" %}
+
+{% block title %}Users - Boglefolio{% endblock %}
+
+{% block content %}
+<header>
+    <h3><i>people</i> Users</h3>
+    <button data-ui="#add-user-modal">
+        <i>add</i>
+        <span>Add User</span>
+    </button>
+</header>
+
+<div id="users-table">
+    {% if users %}
+    <div class="responsive">
+        <table>
+            <thead>
+                <tr>
+                    <th>Username</th>
+                    <th>Email</th>
+                    <th>ID</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for user in users %}
+                <tr>
+                    <td>{{ user.username }}</td>
+                    <td>{{ user.email or '-' }}</td>
+                    <td><code>{{ user.id }}</code></td>
+                    <td>
+                        <button class="small">
+                            <i>edit</i>
+                        </button>
+                        <button class="small">
+                            <i>delete</i>
+                        </button>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <article class="center-align">
+        <i>people</i>
+        <h5>No users yet</h5>
+        <p>Add your first user to start tracking portfolios.</p>
+        <button data-ui="#add-user-modal">
+            <i>add</i>
+            <span>Add User</span>
+        </button>
+    </article>
+    {% endif %}
+</div>
+
+<!-- Add User Modal -->
+<dialog id="add-user-modal">
+    <h5>Add New User</h5>
+    <form hx-post="/users" hx-target="#users-table" hx-swap="outerHTML">
+        <div class="field label border">
+            <input type="text" name="username" required>
+            <label>Username</label>
+        </div>
+        
+        <div class="field label border">
+            <input type="email" name="email">
+            <label>Email (optional)</label>
+        </div>
+        
+        <nav class="right-align">
+            <button type="button" data-ui="#add-user-modal">Cancel</button>
+            <button type="submit">
+                <i>add</i>
+                <span>Add User</span>
+            </button>
+        </nav>
+    </form>
+</dialog>
+{% endblock %}

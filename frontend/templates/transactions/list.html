@@ -1,0 +1,177 @@
+{% extends "base.html" %}
+
+{% block title %}Transactions - Boglefolio{% endblock %}
+
+{% block content %}
+<header>
+    <h3><i>receipt</i> Transactions</h3>
+    <button data-ui="#add-transaction-modal">
+        <i>add</i>
+        <span>Add Transaction</span>
+    </button>
+</header>
+
+<div id="transactions-table">
+    {% if transactions %}
+    <div class="responsive">
+        <table>
+            <thead>
+                <tr>
+                    <th>Date</th>
+                    <th>Asset</th>
+                    <th>Account</th>
+                    <th>Type</th>
+                    <th>Quantity</th>
+                    <th>Price</th>
+                    <th>Fee</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for transaction in transactions %}
+                <tr>
+                    <td>{{ transaction.date.strftime('%Y-%m-%d') }}</td>
+                    <td>{{ transaction.asset.symbol if transaction.asset else 'Unknown' }}</td>
+                    <td>{{ transaction.account.name if transaction.account else 'Unknown' }}</td>
+                    <td>
+                        <span class="chip {% if transaction.type == 'BUY' %}green{% else %}red{% endif %}">
+                            {{ transaction.type }}
+                        </span>
+                    </td>
+                    <td>{{ transaction.quantity }}</td>
+                    <td>${{ "%.2f"|format(transaction.price) }}</td>
+                    <td>${{ "%.2f"|format(transaction.fee) }}</td>
+                    <td>
+                        <button class="small">
+                            <i>edit</i>
+                        </button>
+                        <button class="small">
+                            <i>delete</i>
+                        </button>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <article class="center-align">
+        <i>receipt</i>
+        <h5>No transactions yet</h5>
+        <p>Add your first transaction or import from CSV.</p>
+        <nav>
+            <button data-ui="#add-transaction-modal">
+                <i>add</i>
+                <span>Add Transaction</span>
+            </button>
+            <button data-ui="#import-csv-modal">
+                <i>upload</i>
+                <span>Import CSV</span>
+            </button>
+        </nav>
+    </article>
+    {% endif %}
+</div>
+
+<!-- Add Transaction Modal -->
+<dialog id="add-transaction-modal">
+    <h5>Add New Transaction</h5>
+    <form hx-post="/transactions" hx-target="#transactions-table" hx-swap="outerHTML">
+        <div class="field label suffix border">
+            <select name="asset_id" required>
+                <option value="">Select an asset...</option>
+                {% for asset in assets %}
+                <option value="{{ asset.id }}">{{ asset.symbol }} - {{ asset.name or 'No name' }}</option>
+                {% endfor %}
+            </select>
+            <label>Asset</label>
+            <i>keyboard_arrow_down</i>
+        </div>
+        
+        <div class="field label suffix border">
+            <select name="account_id" required>
+                <option value="">Select an account...</option>
+                {% for account in accounts %}
+                <option value="{{ account.id }}">{{ account.name or 'Unnamed' }}</option>
+                {% endfor %}
+            </select>
+            <label>Account</label>
+            <i>keyboard_arrow_down</i>
+        </div>
+        
+        <div class="field label suffix border">
+            <select name="type" required>
+                <option value="">Select type...</option>
+                <option value="BUY">BUY</option>
+                <option value="SELL">SELL</option>
+                <option value="DIVIDEND">DIVIDEND</option>
+            </select>
+            <label>Transaction Type</label>
+            <i>keyboard_arrow_down</i>
+        </div>
+        
+        <div class="field label border">
+            <input type="number" name="quantity" step="0.001" min="0" required>
+            <label>Quantity</label>
+        </div>
+        
+        <div class="field label prefix border">
+            <i>attach_money</i>
+            <input type="number" name="price" step="0.01" min="0" required>
+            <label>Price</label>
+        </div>
+        
+        <div class="field label prefix border">
+            <i>attach_money</i>
+            <input type="number" name="fee" step="0.01" min="0" value="0.00">
+            <label>Fee</label>
+        </div>
+        
+        <div class="field label border">
+            <input type="datetime-local" name="date" required>
+            <label>Date & Time</label>
+        </div>
+        
+        <nav class="right-align">
+            <button type="button" data-ui="#add-transaction-modal">Cancel</button>
+            <button type="submit">
+                <i>add</i>
+                <span>Add Transaction</span>
+            </button>
+        </nav>
+    </form>
+</dialog>
+
+<!-- Import CSV Modal -->
+<dialog id="import-csv-modal">
+    <h5>Import Transactions from CSV</h5>
+    <form hx-post="/transactions/import-csv" hx-encoding="multipart/form-data">
+        <div class="field label suffix border">
+            <input type="file" name="file" accept=".csv" required>
+            <label>CSV File</label>
+            <i>attach_file</i>
+        </div>
+        
+        <article class="no-padding">
+            <h6>Required CSV Columns:</h6>
+            <ul>
+                <li><code>asset_id</code> - UUID of existing asset</li>
+                <li><code>account_id</code> - UUID of existing account</li>
+                <li><code>type</code> - BUY, SELL, or DIVIDEND</li>
+                <li><code>quantity</code> - Number of shares</li>
+                <li><code>price</code> - Price per share</li>
+                <li><code>fee</code> - Transaction fee (optional)</li>
+                <li><code>date</code> - ISO format date (e.g., 2024-08-22T14:00:00)</li>
+            </ul>
+        </article>
+        
+        <nav class="right-align">
+            <button type="button" data-ui="#import-csv-modal">Cancel</button>
+            <button type="submit">
+                <i>upload</i>
+                <span>Import CSV</span>
+            </button>
+        </nav>
+    </form>
+</dialog>
+{% endblock %}

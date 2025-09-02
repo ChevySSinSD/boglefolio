@@ -11,7 +11,7 @@ from ..models import User, Asset, Account, Transaction
 from ..schemas import UserCreate, AssetCreate, AccountCreate, TransactionCreate, TransactionType
 
 router = APIRouter(tags=["frontend"])
-templates = Jinja2Templates(directory="templates")
+templates = Jinja2Templates(directory="frontend/templates")
 
 @router.get("/", response_class=HTMLResponse)
 async def dashboard(request: Request, session: Session = Depends(get_session)):

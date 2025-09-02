@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard - Boglefolio{% endblock %}
+
+{% block content %}
+<h3><i>dashboard</i> Portfolio Dashboard</h3>
+
+<div class="grid">
+    <article class="border">
+        <h5><i>people</i> Users</h5>
+        <p class="large-text">{{ users_count }}</p>
+        <nav>
+            <a href="/users">View All</a>
+        </nav>
+    </article>
+    
+    <article class="border">
+        <h5><i>trending_up</i> Assets</h5>
+        <p class="large-text">{{ assets_count }}</p>
+        <nav>
+            <a href="/assets">View All</a>
+        </nav>
+    </article>
+    
+    <article class="border">
+        <h5><i>account_balance_wallet</i> Accounts</h5>
+        <p class="large-text">{{ accounts_count }}</p>
+        <nav>
+            <a href="/accounts">View All</a>
+        </nav>
+    </article>
+    
+    <article class="border">
+        <h5><i>receipt</i> Transactions</h5>
+        <p class="large-text">{{ transactions_count }}</p>
+        <nav>
+            <a href="/transactions">View All</a>
+        </nav>
+    </article>
+</div>
+
+<article class="border">
+    <h5><i>upload</i> Quick Import</h5>
+    <p>Upload a CSV file to import transactions</p>
+    <form hx-post="/transactions/import-csv" hx-encoding="multipart/form-data">
+        <div class="field label suffix border">
+            <input type="file" name="file" accept=".csv" required>
+            <label>CSV File</label>
+            <i>attach_file</i>
+        </div>
+        <nav>
+            <button type="submit">
+                <i>upload</i>
+                <span>Import Transactions</span>
+            </button>
+        </nav>
+    </form>
+</article>
+{% endblock %}

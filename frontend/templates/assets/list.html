@@ -1,0 +1,94 @@
+{% extends "base.html" %}
+
+{% block title %}Assets - Boglefolio{% endblock %}
+
+{% block content %}
+<header>
+    <h3><i>trending_up</i> Assets</h3>
+    <button data-ui="#add-asset-modal">
+        <i>add</i>
+        <span>Add Asset</span>
+    </button>
+</header>
+
+<div id="assets-table">
+    {% if assets %}
+    <div class="responsive">
+        <table>
+            <thead>
+                <tr>
+                    <th>Symbol</th>
+                    <th>Name</th>
+                    <th>Currency</th>
+                    <th>Data Source</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for asset in assets %}
+                <tr>
+                    <td><strong>{{ asset.symbol }}</strong></td>
+                    <td>{{ asset.name or '-' }}</td>
+                    <td>{{ asset.currency }}</td>
+                    <td>{{ asset.data_source }}</td>
+                    <td>
+                        <button class="small">
+                            <i>edit</i>
+                        </button>
+                        <button class="small">
+                            <i>delete</i>
+                        </button>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <article class="center-align">
+        <i>trending_up</i>
+        <h5>No assets yet</h5>
+        <p>Add your first asset to start tracking investments.</p>
+        <button data-ui="#add-asset-modal">
+            <i>add</i>
+            <span>Add Asset</span>
+        </button>
+    </article>
+    {% endif %}
+</div>
+
+<!-- Add Asset Modal -->
+<dialog id="add-asset-modal">
+    <h5>Add New Asset</h5>
+    <form hx-post="/assets" hx-target="#assets-table" hx-swap="outerHTML">
+        <div class="field label border">
+            <input type="text" name="symbol" required>
+            <label>Symbol</label>
+        </div>
+        
+        <div class="field label border">
+            <input type="text" name="name">
+            <label>Name (optional)</label>
+        </div>
+        
+        <div class="field label suffix border">
+            <select name="currency">
+                <option value="USD">USD</option>
+                <option value="EUR">EUR</option>
+                <option value="GBP">GBP</option>
+                <option value="CAD">CAD</option>
+            </select>
+            <label>Currency</label>
+            <i>keyboard_arrow_down</i>
+        </div>
+        
+        <nav class="right-align">
+            <button type="button" data-ui="#add-asset-modal">Cancel</button>
+            <button type="submit">
+                <i>add</i>
+                <span>Add Asset</span>
+            </button>
+        </nav>
+    </form>
+</dialog>
+{% endblock %}
