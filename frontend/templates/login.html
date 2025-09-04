@@ -1,0 +1,59 @@
+
+    {% extends "base.html" %}
+
+    {% block title %}Login - Boglefolio{% endblock %}
+
+    {% block content %}
+    <div class="row justify-content-center">
+        <div class="col-md-4">
+            <div class="card shadow">
+                <div class="card-body">
+                    <div class="mb-3">
+                        <a href="/login" class="text-decoration-none">
+                            <i class="bi bi-arrow-left"></i> Back to login options
+                        </a>
+                    </div>
+                    
+                    <h2 class="card-title text-center mb-4">
+                        <i class="bi bi-person-fill"></i> Login
+                    </h2>
+                    
+                    {% if error %}
+                        <div class="alert alert-danger" role="alert">
+                            <i class="bi bi-exclamation-triangle-fill me-2"></i>{{ error }}
+                        </div>
+                    {% endif %}
+                    
+                    <form method="post">
+                        <div class="mb-3">
+                            <label for="username" class="form-label">Username</label>
+                            <input type="text" class="form-control" id="username" name="username" required>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="password" class="form-label">Password</label>
+                            <input type="password" class="form-control" id="password" name="password" required>
+                        </div>
+                        
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="bi bi-box-arrow-in-right me-2"></i>Login
+                            </button>
+                        </div>
+                    </form>
+                    
+                    <hr class="my-4">
+                    
+                    <div class="text-center">
+                        <a href="/login/sso" class="btn btn-outline-success me-2">
+                            <i class="bi bi-shield-lock me-1"></i> SSO Login
+                        </a>
+                        <a href="/register" class="btn btn-outline-primary">
+                            <i class="bi bi-person-plus me-1"></i> Register
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endblock %}

@@ -1,0 +1,29 @@
+c{% extends "base.html" %}
+
+{% block title %}Login - Boglefolio{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <div class="card shadow">
+            <div class="card-body text-center">
+                <h1 class="card-title mb-4">Welcome to Boglefolio</h1>
+                <p class="card-text mb-4">Choose your login method:</p>
+                
+                <div class="d-grid gap-3">
+                    <a href="/login/form" class="btn btn-primary btn-lg">
+                        <i class="bi bi-person-fill me-2"></i> Username & Password
+                    </a>
+                    <a href="/login/sso" class="btn btn-success btn-lg">
+                        <i class="bi bi-shield-lock-fill me-2"></i> Single Sign-On (SSO)
+                    </a>
+                    <hr class="my-4">
+                    <a href="/register" class="btn btn-outline-primary">
+                        <i class="bi bi-person-plus me-2"></i> Create New Account
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

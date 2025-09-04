@@ -68,9 +68,11 @@ class User(SQLModel, table=True):
         id (uuid.UUID): Unique identifier for the user.
         username (str): Username of the user.
         email (str): Email address of the user.
+        password_hash (str): Hashed password for local authentication.
         accounts (list[Account]): Link to accounts table for all accounts owned by this user.
     """
     id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True, index=True)
     username: str = Field(max_length=50, unique=True, index=True)
     email: str | None = Field(default=None, max_length=100, unique=True)
+    password_hash: str | None = Field(default=None, max_length=255)  # New field
     accounts: list[Account] = Relationship(back_populates="user")

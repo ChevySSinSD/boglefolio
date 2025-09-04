@@ -3,57 +3,66 @@
 {% block title %}Dashboard - Boglefolio{% endblock %}
 
 {% block content %}
-<h3><i>dashboard</i> Portfolio Dashboard</h3>
-
-<div class="grid">
-    <article class="border">
-        <h5><i>people</i> Users</h5>
-        <p class="large-text">{{ users_count }}</p>
-        <nav>
-            <a href="/users">View All</a>
-        </nav>
-    </article>
-    
-    <article class="border">
-        <h5><i>trending_up</i> Assets</h5>
-        <p class="large-text">{{ assets_count }}</p>
-        <nav>
-            <a href="/assets">View All</a>
-        </nav>
-    </article>
-    
-    <article class="border">
-        <h5><i>account_balance_wallet</i> Accounts</h5>
-        <p class="large-text">{{ accounts_count }}</p>
-        <nav>
-            <a href="/accounts">View All</a>
-        </nav>
-    </article>
-    
-    <article class="border">
-        <h5><i>receipt</i> Transactions</h5>
-        <p class="large-text">{{ transactions_count }}</p>
-        <nav>
-            <a href="/transactions">View All</a>
-        </nav>
-    </article>
-</div>
-
-<article class="border">
-    <h5><i>upload</i> Quick Import</h5>
-    <p>Upload a CSV file to import transactions</p>
-    <form hx-post="/transactions/import-csv" hx-encoding="multipart/form-data">
-        <div class="field label suffix border">
-            <input type="file" name="file" accept=".csv" required>
-            <label>CSV File</label>
-            <i>attach_file</i>
+<div class="row">
+    <div class="col-12">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h1><i class="bi bi-speedometer2 me-2"></i>Dashboard</h1>
+            <div class="btn-group">
+                <button type="button" class="btn btn-primary dropdown-toggle" data-bs-toggle="dropdown">
+                    <i class="bi bi-plus-circle me-1"></i> Add New
+                </button>
+                <ul class="dropdown-menu">
+                    <li><a class="dropdown-item" href="#"><i class="bi bi-bank me-2"></i>Account</a></li>
+                    <li><a class="dropdown-item" href="#"><i class="bi bi-arrow-left-right me-2"></i>Transaction</a></li>
+                </ul>
+            </div>
         </div>
-        <nav>
-            <button type="submit">
-                <i>upload</i>
-                <span>Import Transactions</span>
-            </button>
-        </nav>
-    </form>
-</article>
+        
+        <!-- Portfolio Summary Cards -->
+        <div class="row mb-4">
+            <div class="col-md-3">
+                <div class="card text-center">
+                    <div class="card-body">
+                        <h5 class="card-title text-muted">Total Value</h5>
+                        <h2 class="card-text text-success">$0.00</h2>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card text-center">
+                    <div class="card-body">
+                        <h5 class="card-title text-muted">Today's Change</h5>
+                        <h2 class="card-text">$0.00</h2>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card text-center">
+                    <div class="card-body">
+                        <h5 class="card-title text-muted">Total Accounts</h5>
+                        <h2 class="card-text text-primary">0</h2>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card text-center">
+                    <div class="card-body">
+                        <h5 class="card-title text-muted">Assets Tracked</h5>
+                        <h2 class="card-text text-info">0</h2>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Recent Activity -->
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0"><i class="bi bi-clock-history me-2"></i>Recent Activity</h5>
+            </div>
+            <div class="card-body">
+                <p class="text-muted">No recent activity. Start by adding an account!</p>
+            </div>
+        </div>
+    </div>
+</div>
 {% endblock %}
